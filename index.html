@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CO3133 Assignment 02 report page by Group Goat.">
+    <title>Assignment 02 – Emotion Text Classification | Group Goat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!--
+      Layout, CSS and interactions come from the group's earlier report page (assignment1_text.html).
+      To restyle for the group's own format, change the :root tokens and fonts first; avoid touching layout classes.
+    -->
+    <style>
+        :root {
+            /* Same palette as site/index.html */
+            --navy: #0b2a4a;
+            --bg: #f7fbff;
+            --ink: #17324d;
+            --muted: #64748b;
+            --panel: #ffffff;
+            --line: #d7e4f1;
+            --accent: #1769aa;
+            --accent-2: #16a6b6;
+            --radius: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 12% 4%, rgba(22, 166, 182, 0.13), transparent 28rem),
+                radial-gradient(circle at 92% 2%, rgba(23, 105, 170, 0.12), transparent 26rem),
+                var(--bg);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .progress-track {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.45);
+            z-index: 999;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 0.15s linear;
+        }
+
+        .container {
+            width: min(1180px, 92vw);
+            margin: 0 auto;
+            padding: 2rem 0 4rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            margin-bottom: 1.2rem;
+            padding: 0.55rem 0.95rem;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.75);
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.84rem;
+            font-weight: 800;
+        }
+
+        .back-link:hover {
+            border-color: var(--accent);
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: calc(var(--radius) + 8px);
+            background:
+                linear-gradient(135deg, #ffffff 0%, #f1f8ff 55%, #eaf8fa 100%);
+            padding: 2.2rem;
+            margin-bottom: 1.4rem;
+            box-shadow: 0 22px 60px rgba(11, 42, 74, 0.11);
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            right: -90px;
+            bottom: -110px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(22, 166, 182, 0.28), transparent 70%);
+        }
+
+        .hero h1 {
+            font-family: inherit;
+            font-size: clamp(1.9rem, 3.6vw, 3rem);
+            line-height: 1.15;
+            color: var(--navy);
+            font-weight: 800;
+            letter-spacing: -0.035em;
+            margin-bottom: 0.8rem;
+        }
+
+        .hero p {
+            color: var(--muted);
+            max-width: 760px;
+            margin-bottom: 1.2rem;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .chip {
+            font-size: 0.85rem;
+            padding: 0.35rem 0.65rem;
+            border: 1px solid #c9d9ea;
+            border-radius: 999px;
+            background: #fff;
+            color: #17324d;
+            font-weight: 700;
+        }
+
+        .chip.mono {
+            font-family: "Consolas", "Courier New", monospace;
+            font-weight: 700;
+        }
+
+        .toc {
+            position: sticky;
+            top: 14px;
+            z-index: 10;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid var(--line);
+            backdrop-filter: blur(5px);
+            padding: 0.75rem;
+            border-radius: 14px;
+            margin-bottom: 1.2rem;
+        }
+
+        .toc a {
+            text-decoration: none;
+            color: #23405e;
+            font-size: 0.82rem;
+            padding: 0.4rem 0.55rem;
+            border-radius: 9px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .toc a:hover,
+        .toc a.active {
+            color: #0b2a4a;
+            background: #fff;
+            border-color: #bcd2e8;
+        }
+
+        .section-card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: clamp(1rem, 2.2vw, 1.7rem);
+            margin-bottom: 1rem;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.65s ease, transform 0.65s ease;
+        }
+
+        .section-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-head {
+            display: flex;
+            align-items: baseline;
+            gap: 0.7rem;
+            margin-bottom: 0.6rem;
+            border-bottom: 1px dashed #d3e0ed;
+            padding-bottom: 0.55rem;
+        }
+
+        .section-head .idx {
+            font-family: inherit;
+            color: var(--accent);
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .section-head h2 {
+            font-size: clamp(1.15rem, 2.1vw, 1.6rem);
+            color: var(--navy);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .section-card p {
+            color: var(--muted);
+            margin-bottom: 0.8rem;
+        }
+
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 0.7rem;
+            margin-top: 0.35rem;
+        }
+
+        .kpi {
+            background: #fff;
+            border: 1px solid #d6e3f0;
+            border-radius: 13px;
+            padding: 0.8rem;
+        }
+
+        .kpi .label {
+            color: #5f7186;
+            font-size: 0.83rem;
+        }
+
+        .kpi .value {
+            font-weight: 800;
+            font-size: 1.02rem;
+            margin-top: 0.12rem;
+            color: #17324d;
+        }
+
+        .grid-2,
+        .grid-4 {
+            display: grid;
+            gap: 0.8rem;
+            margin-top: 0.8rem;
+        }
+
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+        .grid-4 { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+        .eda-split {
+            grid-template-columns: 7fr 3fr;
+            align-items: start;
+        }
+
+        .eda-split figure[data-map="eda-1"] img {
+            height: 360px;
+            object-fit: contain;
+            background: #fff;
+        }
+
+        .preprocess-block {
+            margin-top: 1rem;
+        }
+
+        .preprocess-grid {
+            display: grid;
+            gap: 0.8rem;
+            margin-top: 0.8rem;
+            grid-template-columns: 1.1fr 1fr 1fr;
+        }
+
+        .preprocess-grid .span-2 { grid-column: span 2; }
+
+        .preprocess-card {
+            border: 1px solid #d6e2ee;
+            border-radius: 15px;
+            background: #fff;
+            padding: 0.9rem;
+        }
+
+        .preprocess-card h4 {
+            font-size: 0.95rem;
+            color: #13304f;
+            margin-bottom: 0.35rem;
+        }
+
+        .preprocess-card p {
+            color: #5a6c80;
+            font-size: 0.86rem;
+            margin: 0;
+        }
+
+        .preprocess-card .mode-title {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 0.45rem;
+            padding: 0.25rem 0.55rem;
+            border-radius: 999px;
+            background: #eef5fc;
+            border: 1px solid #d5e5f4;
+            color: #1b3d60;
+            font-size: 0.76rem;
+            font-weight: 800;
+        }
+
+        .preprocess-card figure.card-figure {
+            margin-top: 0.65rem;
+        }
+
+        .preprocess-card figure.card-figure img {
+            height: 220px;
+            object-fit: contain;
+            background: #fff;
+        }
+
+        figure.card-figure {
+            border: 1px solid #d6e2ee;
+            border-radius: 15px;
+            background: #fff;
+            overflow: hidden;
+            cursor: zoom-in;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        figure.card-figure:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 22px rgba(11, 42, 74, 0.12);
+        }
+
+        .card-figure img,
+        .img-placeholder {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .img-placeholder {
+            border-bottom: 1px solid #d9e5f1;
+            background: repeating-linear-gradient(
+                -45deg,
+                #e9f1f9,
+                #e9f1f9 12px,
+                #f6faff 12px,
+                #f6faff 24px
+            );
+            color: #61748a;
+            font-weight: 700;
+            text-align: center;
+            padding: 1.2rem 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-figure figcaption {
+            padding: 0.65rem 0.8rem;
+            font-size: 0.86rem;
+            color: #51647a;
+        }
+
+        .card-figure.metric-plot {
+            background: #fbfdff;
+        }
+
+        /* Wide multi-panel figures and confusion matrices: keep their own aspect ratio instead of a 220px strip */
+        .card-figure.wide-plot img,
+        .confusion-gallery .card-figure img {
+            height: auto;
+        }
+
+        .card-figure.metric-plot img {
+            object-fit: contain;
+            background: #fff;
+            padding: 0.5rem;
+            border-bottom: 1px solid #d9e5f1;
+        }
+
+        .card-figure.custom-head-plot img,
+        .card-figure.custom-head-plot .img-placeholder {
+            height: 320px;
+            object-fit: contain;
+            background: #fff;
+            padding: 0.45rem;
+            border-bottom: 1px solid #d9e5f1;
+        }
+
+        .code-box {
+            margin-top: 0.75rem;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid #1e3a5a;
+            background: linear-gradient(140deg, #0b1f36 0%, #12304f 100%);
+            box-shadow: inset 0 1px 0 rgba(214, 232, 250, 0.08);
+        }
+
+        .code-box pre {
+            margin: 0;
+            background: transparent;
+        }
+
+        .code-box code {
+            color: #eaf3fc;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            display: block;
+            padding: 1rem 1.05rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .code-box .hljs {
+            background: transparent;
+        }
+
+        .code-box .hljs-keyword,
+        .code-box .hljs-literal,
+        .code-box .hljs-type {
+            color: #ff8fb6;
+        }
+
+        .code-box .hljs-title.function_,
+        .code-box .hljs-title.class_ {
+            color: #ffd67a;
+        }
+
+        .code-box .hljs-string {
+            color: #bde87e;
+        }
+
+        .code-box .hljs-number,
+        .code-box .hljs-params {
+            color: #ffbd7a;
+        }
+
+        .code-box .hljs-comment {
+            color: #8fa9c4;
+            font-style: italic;
+        }
+
+        .backbone-card {
+            border: 1px solid #d6e2ee;
+            border-radius: 15px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .backbone-card .head {
+            padding: 0.7rem;
+            border-bottom: 1px solid #e1eaf3;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            font-weight: 700;
+        }
+
+        .training-tabs {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.8rem;
+        }
+
+        .tab-btn,
+        .filter-btn {
+            border: 1px solid #bccfe3;
+            background: #fff;
+            color: #1b3d60;
+            border-radius: 10px;
+            padding: 0.45rem 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.82rem;
+        }
+
+        .tab-btn.active,
+        .filter-btn.active {
+            background: #0b2a4a;
+            color: #f2f8ff;
+            border-color: #0b2a4a;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .confusion-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .compare-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.8rem;
+        }
+
+        .compare-item {
+            border: 1px solid #d9e5f1;
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .compare-item .title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            padding: 0.65rem 0.75rem;
+            border-bottom: 1px solid #e1eaf3;
+            color: #2a4664;
+        }
+
+        .compare-item .card-figure {
+            flex: initial;
+        }
+
+        .compare-item .card-figure img {
+            height: auto;
+            object-fit: contain;
+            background: #fff;
+            border-bottom: 1px solid #e6eef6;
+        }
+
+        .compare-item .img-placeholder {
+            height: 220px;
+            font-size: 0.84rem;
+            background: #fff;
+            border-bottom: 1px solid #e6eef6;
+        }
+
+        .sample-label {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #0b2a4a;
+        }
+
+        .compare-table-card {
+            border: 1px solid #d6e2ee;
+            border-radius: 15px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .compare-table-card .title {
+            padding: 0.65rem 0.8rem;
+            font-weight: 800;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #e1eaf3;
+            color: #17324d;
+            background: #f3f8fd;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.84rem;
+            min-width: 760px;
+        }
+
+        .ranking-table th,
+        .ranking-table td {
+            padding: 0.48rem 0.55rem;
+            border-bottom: 1px solid #edf3f9;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .ranking-table th {
+            background: #f8fbff;
+            color: #50647a;
+            font-size: 0.79rem;
+            font-weight: 700;
+        }
+
+        .ranking-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .ranking-table .model-col {
+            min-width: 150px;
+            font-weight: 700;
+        }
+
+        .ranking-table .score-col,
+        .ranking-table .cost-col {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-weight: 700;
+        }
+
+        .ranking-table .metric-top1 {
+            background: #e3f0fb;
+            color: #0f5a94;
+        }
+
+        .ranking-table .metric-top2 {
+            background: #e4f6f8;
+            color: #0e6f7a;
+        }
+
+        .ranking-table .up::after {
+            content: " ↑";
+            color: #1769aa;
+            font-weight: 800;
+        }
+
+        .ranking-table .down::after {
+            content: " ↓";
+            color: #b45309;
+            font-weight: 800;
+        }
+
+        .table-legend {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            padding: 0.5rem 0.8rem 0.7rem;
+            border-top: 1px solid #e6eef6;
+            background: #fbfdff;
+        }
+
+        .legend-chip {
+            padding: 0.22rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            border: 1px solid #d6e2ee;
+            color: #2f4a66;
+            font-weight: 700;
+        }
+
+        .legend-chip.top1 {
+            background: #e3f0fb;
+        }
+
+        .legend-chip.top2 {
+            background: #e4f6f8;
+        }
+
+        .comparison-controls {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(170px, 1fr));
+            gap: 0.7rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .comparison-control {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .comparison-control label {
+            font-size: 0.8rem;
+            color: #51647a;
+            font-weight: 700;
+        }
+
+        .comparison-control select {
+            border: 1px solid #c8d8e9;
+            border-radius: 10px;
+            background: #fff;
+            color: #1b3d60;
+            font-size: 0.83rem;
+            font-weight: 700;
+            padding: 0.5rem 0.65rem;
+            font-family: inherit;
+        }
+
+        .comparison-empty {
+            margin-top: 0.7rem;
+            color: #5c6f84;
+            font-weight: 700;
+        }
+
+        .experiment-text-box {
+            margin-top: 0.7rem;
+            border: 1px solid #d6e2ee;
+            border-radius: 12px;
+            background: #f8fbff;
+            padding: 0.8rem;
+        }
+
+        .experiment-text-box .label {
+            font-size: 0.78rem;
+            color: #52667c;
+            font-weight: 800;
+            margin-bottom: 0.35rem;
+            display: block;
+        }
+
+        .experiment-text-box p {
+            margin: 0;
+            color: #23405e;
+            font-size: 0.86rem;
+            line-height: 1.55;
+        }
+
+        .experiment-viz-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.8rem;
+            margin-top: 0.9rem;
+        }
+
+        .experiment-viz-frame {
+            width: 100%;
+            height: 430px;
+            border: 0;
+            display: block;
+            background: #fff;
+        }
+
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 22, 38, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .lightbox.open { display: flex; }
+
+        .lightbox img {
+            width: min(1100px, 96vw);
+            max-height: 90vh;
+            border-radius: 14px;
+            border: 2px solid #f1f6fb;
+            object-fit: contain;
+            background: #fff;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            color: white;
+            font-size: 1.9rem;
+            cursor: pointer;
+            line-height: 1;
+            font-weight: 700;
+        }
+
+        .sample-preview-card {
+            border: 1px solid #d6e2ee;
+            border-radius: 15px;
+            background: #fff;
+            padding: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+        }
+
+        .sample-preview-card h4 {
+            font-size: 0.95rem;
+            color: #13304f;
+            margin: 0;
+        }
+
+        .sample-preview-text {
+            border: 1px dashed #c9d9ea;
+            border-radius: 10px;
+            background: #f6faff;
+            padding: 0.65rem 0.7rem;
+            font-size: 0.8rem;
+            color: #3d5670;
+            line-height: 1.5;
+            max-height: 220px;
+            overflow: hidden;
+        }
+
+        .sample-preview-note {
+            font-size: 0.78rem;
+            color: #5d7186;
+            margin: 0;
+        }
+
+        .sample-open-btn {
+            align-self: flex-start;
+            border: 1px solid #0b2a4a;
+            background: #0b2a4a;
+            color: #f4f9ff;
+            border-radius: 10px;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .sample-open-btn:hover {
+            opacity: 0.9;
+        }
+
+        .text-modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(8, 22, 38, 0.86);
+            z-index: 2100;
+            padding: 1rem;
+        }
+
+        .text-modal.open {
+            display: flex;
+        }
+
+        .text-modal-card {
+            width: min(980px, 96vw);
+            max-height: 90vh;
+            background: #fdfeff;
+            border: 1px solid #d6e2ee;
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .text-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.65rem 0.9rem;
+            border-bottom: 1px solid #e1eaf3;
+            background: #eef5fc;
+        }
+
+        .text-modal-head h4 {
+            margin: 0;
+            font-size: 0.92rem;
+            color: #13304f;
+        }
+
+        .text-modal-close {
+            border: none;
+            background: transparent;
+            color: #24425f;
+            font-size: 1.2rem;
+            line-height: 1;
+            cursor: pointer;
+            font-weight: 800;
+        }
+
+        .text-modal-body {
+            margin: 0;
+            padding: 0.85rem 0.95rem;
+            overflow: auto;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 0.77rem;
+            line-height: 1.45;
+            color: #22405d;
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: #fff;
+        }
+
+
+        /* ─── LIVE DEMO SECTION ─────────────────────────────────── */
+        .demo-hf-wrap {
+            border: 1px solid #d6e2ee;
+            border-radius: 13px;
+            background: #fff;
+            padding: 1rem 1.1rem;
+        }
+        .demo-hf-iframe {
+            width: 100%;
+            min-height: 680px;
+            border: 1px solid #d6e2ee;
+            border-radius: 12px;
+            background: #fff;
+            margin: 0.4rem 0 0.9rem;
+        }
+        .demo-hf-cta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+            text-align: center;
+            padding: 1rem 0;
+        }
+        .demo-hf-icon { font-size: 2.5rem; line-height: 1; }
+        .demo-hf-cta p {
+            font-size: 0.88rem;
+            color: var(--muted);
+            max-width: 500px;
+            margin: 0;
+        }
+        .demo-hf-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+            color: #fff;
+            font-weight: 800;
+            font-size: 0.9rem;
+            padding: 0.6rem 1.4rem;
+            border-radius: 11px;
+            text-decoration: none;
+            transition: opacity 0.18s, transform 0.18s;
+        }
+        .demo-hf-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+        .demo-hf-note {
+            font-size: 0.78rem !important;
+            color: #7d8fa3 !important;
+        }
+        @media (max-width: 680px) {
+            .demo-top-row { grid-template-columns: 1fr; }
+            .demo-input-row { flex-direction: column; }
+            .demo-hf-iframe { min-height: 520px; }
+            .eda-split { grid-template-columns: 1fr; }
+            .eda-split figure[data-map="eda-1"] img { height: 260px; }
+            .preprocess-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 980px) {
+            .preprocess-grid { grid-template-columns: 1fr; }
+            .preprocess-grid .span-2 { grid-column: auto; }
+        }
+
+        @media (max-width: 980px) {
+            .compare-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .comparison-controls { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 680px) {
+            .container { width: min(100%, 94vw); }
+            .hero { padding: 1.35rem; }
+            .section-card { border-radius: 16px; }
+            .card-figure img,
+            .img-placeholder { height: 180px; }
+            .card-figure.custom-head-plot img,
+            .card-figure.custom-head-plot .img-placeholder { height: 240px; }
+            .compare-row { grid-template-columns: 1fr; }
+            .comparison-controls { grid-template-columns: 1fr; }
+        }
+
+        /* ---------- Group site chrome (topbar / footer), matches index.html ---------- */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+
+        .brand .mark {
+            display: inline-grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 11px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            box-shadow: 0 10px 25px rgba(23, 105, 170, 0.25);
+            font-family: inherit;
+            font-size: 0.85rem;
+        }
+
+        .brand-text {
+            font-size: 0.86rem;
+        }
+
+        .site-footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 0.86rem;
+            text-align: center;
+        }
+
+        /* ---------- Hero meta (members / instructor) ---------- */
+        .eyebrow,
+        .hero .eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 0.4rem;
+        }
+
+        .hero-meta {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 0.8rem;
+            margin-top: 1.1rem;
+        }
+
+        .meta-card {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 0.8rem 0.95rem;
+        }
+
+        .meta-card .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+        }
+
+        .member-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem 1.2rem;
+        }
+
+        .member small {
+            color: var(--muted);
+            margin-left: 0.3rem;
+        }
+
+        /* ---------- Plain info tables (setup, error groups, AI disclosure) ---------- */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .info-table th,
+        .info-table td {
+            text-align: left;
+            vertical-align: top;
+            padding: 0.55rem 0.7rem;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .info-table th {
+            background: #eef5fc;
+            font-weight: 700;
+        }
+
+        /* ---------- Experiment design card ---------- */
+        .design-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.7rem;
+            margin-top: 0.75rem;
+        }
+
+        .design-item {
+            border: 1px solid var(--line);
+            border-left: 4px solid var(--accent-2);
+            border-radius: 12px;
+            background: #fff;
+            padding: 0.7rem 0.85rem;
+        }
+
+        .design-item .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .callout {
+            margin-top: 0.85rem;
+            border-radius: 14px;
+            border: 1px dashed var(--accent);
+            background: #f1f7fd;
+            padding: 0.75rem 0.95rem;
+        }
+
+        /* ---------- Resource links ---------- */
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.7rem;
+            margin-top: 0.75rem;
+        }
+
+        .link-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.6rem;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #fff;
+            padding: 0.8rem 0.95rem;
+            color: var(--ink);
+            text-decoration: none;
+            font-weight: 700;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .link-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent);
+        }
+
+        .link-card small {
+            display: block;
+            font-weight: 500;
+            color: var(--muted);
+        }
+
+        .video-frame {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            margin-top: 0.85rem;
+        }
+
+        /* ---------- TODO markers: visible on purpose so gaps are never submitted silently ---------- */
+        .todo {
+            background: #fff1a8;
+            border-radius: 4px;
+            padding: 0 0.25rem;
+            font-weight: 700;
+        }
+
+        @media (max-width: 680px) {
+            .hero-meta { grid-template-columns: 1fr; }
+            .topbar { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+
+    <div class="container">
+        <!-- Group site chrome: same brand + back link as the group's index.html -->
+        <header class="topbar">
+            <a class="brand" href="../"><span class="mark">AI</span><span class="brand-text">HCMUT · GROUP GOAT</span></a>
+            <a class="back-link" href="site/index.html">&larr; Assignment 02 overview</a>
+        </header>
+
+        <!-- ═══════════════ HERO ═══════════════ -->
+        <header class="hero">
+            <p class="eyebrow">CO3133 · Deep Learning and Its Applications · Semester 261</p>
+            <h1>Assignment 02 — Emotion Text Classification</h1>
+            <p>
+                We classify short English texts from <em>dair-ai/emotion</em> into six emotions and compare a TF-IDF +
+                Logistic Regression baseline with two fine-tuned transformers, DistilBERT and BERT. On the validation set
+                (M2, preliminary), DistilBERT reaches Macro-F1 0.9155 ± 0.0020 over three seeds against 0.8489 for the
+                baseline; BERT reaches 0.9163 ± 0.0032, no better than DistilBERT, at about twice the cost.
+                Test results follow after model selection.
+            </p>
+            <div class="chip-row">
+                <a href="https://huggingface.co/datasets/dair-ai/emotion" class="chip" target="_blank" rel="noopener">Dataset: dair-ai/emotion (split)</a>
+                <span class="chip">Baseline: TF-IDF + Logistic Regression</span>
+                <span class="chip">Pretrained: DistilBERT · BERT</span>
+                <span class="chip">Framework: PyTorch · scikit-learn</span>
+                <span class="chip">Hardware: Colab T4 GPU · Xeon CPU</span>
+            </div>
+            <div class="hero-meta">
+                <div class="meta-card">
+                    <div class="label">Group members</div>
+                    <div class="member-list">
+                        <span class="member"><strong>Hoàng Trọng Huy Minh</strong><small>2452743</small></span>
+                        <span class="member"><strong>Võ Lê Thành Triệu</strong><small>2453297 · Team Leader</small></span>
+                        <span class="member"><strong>Nguyễn Huỳnh Nam Quốc</strong><small>2453089</small></span>
+                    </div>
+                </div>
+                <div class="meta-card">
+                    <div class="label">Instructor</div>
+                    <strong>Lê Thành Sách</strong>
+                </div>
+            </div>
+        </header>
+
+        <nav class="toc" id="toc">
+            <a href="#intro">Problem</a>
+            <a href="#eda">Data & EDA</a>
+            <a href="#data-split">Split & Leakage</a>
+            <a href="#models">Models</a>
+            <a href="#training">Setup & Training</a>
+            <a href="#comparison">Results</a>
+            <a href="#ablation">Controlled Experiments</a>
+            <a href="#errors">Error Analysis</a>
+            <a href="#conclusion">Conclusion</a>
+            <a href="#resources">Resources</a>
+        </nav>
+
+        <!-- ═══════════════ 01 PROBLEM ═══════════════ -->
+        <section class="section-card reveal" id="intro">
+            <div class="section-head">
+                <span class="idx">01</span>
+                <h2>Problem statement</h2>
+            </div>
+            <p>
+                Single-label multiclass classification: given one short English text, predict one of six emotions
+                (sadness, joy, love, anger, fear, surprise). The prediction unit is one text. Recognising emotion in short,
+                informal writing is a common building block for feedback analysis, support triage and social-media monitoring.
+                The main difficulties are strong class imbalance (joy 33.5% vs surprise 3.5% of train), very short texts
+                (median 17 words), emotions that overlap in wording (joy and love), and machine-generated labels with some
+                conflicting duplicates.
+            </p>
+            <div class="kpis">
+                <div class="kpi"><div class="label">Task</div><div class="value">Multiclass text classification</div></div>
+                <div class="kpi"><div class="label">Classes</div><div class="value">6 emotions</div></div>
+                <div class="kpi"><div class="label">Metrics</div><div class="value">Macro-F1 (selection) + Accuracy</div></div>
+                <div class="kpi"><div class="label">Runs compared (M2)</div><div class="value">8 runs · 3 models (validation)</div></div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ 02 DATA & EDA ═══════════════ -->
+        <!-- Numbers below come from the Colab output of notebook blocks 3–11 (2026-10-25/26). -->
+        <section class="section-card reveal" id="eda">
+            <div class="section-head">
+                <span class="idx">02</span>
+                <h2>Dataset description and EDA</h2>
+            </div>
+            <p>
+                We use the six-class <code>split</code> configuration of
+                <a href="https://huggingface.co/datasets/dair-ai/emotion" target="_blank" rel="noopener">dair-ai/emotion</a>
+                (Saravia et al., EMNLP 2018), pinned to Hugging Face revision <code>cab853a</code>: 20,000 short English
+                texts with one label each (sadness, joy, love, anger, fear, surprise). The dataset card marks the labels as
+                machine-generated and restricts use to education and research. No split has missing, blank or non-string
+                texts or invalid labels. This section shows only the findings that changed a modelling decision.
+            </p>
+            <div class="kpis">
+                <div class="kpi"><div class="label">Samples after filtering</div><div class="value">19,916 of 20,000</div></div>
+                <div class="kpi"><div class="label">Imbalance ratio (train)</div><div class="value">9.47 (joy 5,340 / surprise 564)</div></div>
+                <div class="kpi"><div class="label">Median length (train)</div><div class="value">17 words · 20 tokens</div></div>
+                <div class="kpi"><div class="label">Rows removed by filtering</div><div class="value">84 (train 77, val 7)</div></div>
+            </div>
+            <div class="grid-2 eda-split" style="margin-top: 0.9rem;">
+                <figure class="card-figure metric-plot">
+                    <img src="site/assets/images/a2_class_dist.png" alt="Class distribution per split">
+                    <figcaption>Original release, before filtering. Joy is 9.4× larger than surprise in train, and the three splits have nearly the same class shares.</figcaption>
+                </figure>
+                <div class="sample-preview-card">
+                    <h4>Text samples (from the notebook output)</h4>
+                    <div class="sample-preview-text">
+                        <strong>sadness</strong><br>i didnt feel humiliated<br><br>
+                        <strong>joy</strong><br>i do not feel reassured anxiety is on each side<br><br>
+                        <strong>anger</strong><br>i am feeling grouchy
+                    </div>
+                    <p class="sample-preview-note">Most texts follow "i feel(ing) &lt;emotion word&gt; …". The joy sample is negated yet labelled joy.</p>
+                    <button class="sample-open-btn" id="openSampleText" type="button">Show more samples</button>
+                </div>
+            </div>
+
+            <div class="compare-table-card" style="margin-top: 0.9rem;">
+                <div class="title">What the EDA changed in the models</div>
+                <div class="table-scroll">
+                    <table class="info-table">
+                        <thead><tr><th>Finding</th><th>Evidence (train unless stated)</th><th>Decision</th></tr></thead>
+                        <tbody>
+                            <tr><td>Imbalanced classes</td><td>joy 33.5%, surprise 3.5%; ratio 9.47</td><td>Select models by validation Macro-F1, not accuracy. Class weights were tested on the baseline (validation only): balanced weights raised Macro-F1 from 0.7527 to 0.8489 and surprise recall from 0.40 to 0.81, so they are used for every model</td></tr>
+                            <tr><td>Same text in two splits (leakage)</td><td>19 texts appear in two splits: 11 in train and test, 3 in val and test, 5 in train and val. A model trained on such a text would be scored on a sentence it has already seen, which inflates val/test scores</td><td>Rules 1–2: keep the test copy and remove the train/val copy; for train–val pairs keep the val copy (section 03)</td></tr>
+                            <tr><td>Same text, different labels</td><td>51 of the 52 repeated texts carry two different labels, e.g. "i am feeling stressed and more than a bit anxious" is sadness in train but anger in test</td><td>Rules 3–4: remove such groups from train/val (no label is guessed); test keeps its released labels, noted as a limitation</td></tr>
+                            <tr><td>Short texts</td><td>DistilBERT tokens: P95 45, max 87 (incl. [CLS]/[SEP])</td><td><code>MAX_LEN = 128</code>: no text is truncated</td></tr>
+                            <tr><td>No length shortcut</td><td>Median words per class 16–19</td><td>Length is not a cue for the label; no length feature or length-based sampling</td></tr>
+                            <tr><td>Labels look keyword-driven</td><td>Most class-specific n-grams are emotion adjectives found in a single class (e.g. "feel offended" in anger only)</td><td>Expect a strong lexical baseline; negated texts are checked as an error group (hypothesis, not a result)</td></tr>
+                            <tr><td>Small vocabulary gap</td><td>Words unseen in train: 2.72% of val tokens, 2.74% of test tokens</td><td>A TF-IDF vocabulary fit on train only covers val/test well</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="preprocess-block">
+                <div class="section-head" style="margin-top: 1rem;">
+                    <span class="idx">02.1</span>
+                    <h2>Text length and preprocessing</h2>
+                </div>
+                <p>
+                    Both models get the minimal text: Unicode NFC, lowercase, trimmed, repeated spaces collapsed. Nothing else
+                    is removed, because DistilBERT uses punctuation and function words, and negations such as <em>not</em>
+                    flip an emotion. The aggressive variant is used only by the baseline stopword experiment.
+                </p>
+                <div class="preprocess-grid">
+                    <div class="preprocess-card">
+                        <span class="mode-title">Minimal · text_min</span>
+                        <h4>Used for</h4>
+                        <p>Both models (main runs). Train vocabulary 15,188 words, 19.18 words per text.</p>
+                    </div>
+                    <figure class="card-figure preprocess-card metric-plot">
+                        <img src="site/assets/images/a2_text_len.png" alt="Text length distribution">
+                        <figcaption>Train lengths are right-skewed: median 17 words, P95 41, max 66.</figcaption>
+                    </figure>
+                    <figure class="card-figure preprocess-card metric-plot">
+                        <img src="site/assets/images/a2_text_len_class.png" alt="Text length by class">
+                        <figcaption>All classes have similar lengths, so length does not reveal the label.</figcaption>
+                    </figure>
+                </div>
+                <div class="preprocess-grid" style="margin-top: 0.8rem;">
+                    <div class="preprocess-card">
+                        <span class="mode-title">Aggressive · text_aggr</span>
+                        <h4>Used for</h4>
+                        <p>Baseline stopword experiment only. Keeps letters and digits, removes 295 scikit-learn stopwords but
+                        keeps 23 negations and intensifiers (not, no, never, very, so, but…). 9.31 words per text, no empty text.</p>
+                    </div>
+                    <figure class="card-figure preprocess-card metric-plot span-2">
+                        <img src="site/assets/images/a2_top_ngrams.png" alt="Top n-grams per class">
+                        <figcaption>Most class-specific n-grams (train). They are the emotion words themselves; the dashed line is the class share of train.</figcaption>
+                    </figure>
+                </div>
+                <div class="compare-table-card" style="margin-top: 0.9rem;">
+                    <div class="title">DistilBERT input length in tokens (incl. [CLS] and [SEP])</div>
+                    <div class="table-scroll">
+                        <table class="info-table">
+                            <thead><tr><th>Split</th><th>Median</th><th>P95</th><th>P99</th><th>Max</th><th>Texts longer than MAX_LEN = 128</th></tr></thead>
+                            <tbody>
+                                <tr><td>train</td><td>20</td><td>45</td><td>57</td><td>87</td><td>0 (0%)</td></tr>
+                                <tr><td>val</td><td>20</td><td>44</td><td>56</td><td>69</td><td>0 (0%)</td></tr>
+                                <tr><td>test</td><td>20</td><td>45</td><td>55</td><td>66</td><td>0 (0%)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <p style="margin-top: 0.7rem;">
+                    DistilBERT reads WordPiece tokens, not words: it adds [CLS] and [SEP] and splits some words into pieces
+                    (e.g. <code>didnt</code> → <code>didn</code> + <code>##t</code>), so one word is about 1.06 tokens here.
+                    The longest text has 87 tokens, so <code>MAX_LEN = 128</code> keeps every text whole and nothing is truncated.
+                </p>
+            </div>
+        </section>
+
+        <!-- ═══════════════ 03 SPLIT & LEAKAGE ═══════════════ -->
+        <section class="section-card reveal" id="data-split">
+            <div class="section-head">
+                <span class="idx">03</span>
+                <h2>Data split and leakage control</h2>
+            </div>
+            <p>
+                We keep the official train / validation / test splits and never change the test set. Two texts count as the
+                same when their normalized keys match (NFC → lowercase → trim → collapse spaces). The four approved rules are
+                applied in order; the first two prevent leakage, the last two clean labels. Test is used once, after model selection.
+            </p>
+            <div class="kpis">
+                <div class="kpi"><div class="label">Train</div><div class="value">15,923 (79.95%)</div></div>
+                <div class="kpi"><div class="label">Validation</div><div class="value">1,993 (10.01%)</div></div>
+                <div class="kpi"><div class="label">Test</div><div class="value">2,000 (10.04%)</div></div>
+                <div class="kpi"><div class="label">Cross-split overlap after filtering</div><div class="value">0</div></div>
+            </div>
+            <div class="compare-table-card" style="margin-top: 0.9rem;">
+                <div class="title">Rows removed by rule</div>
+                <div class="table-scroll">
+                    <table class="info-table">
+                        <thead><tr><th>Rule</th><th>Train removed</th><th>Val removed</th></tr></thead>
+                        <tbody>
+                            <tr><td>1. Text also in test → drop the train/val copy</td><td>11</td><td>3</td></tr>
+                            <tr><td>2. Text in both train and val → drop the train copy</td><td>5</td><td>–</td></tr>
+                            <tr><td>3. Same text with different labels → drop the whole group</td><td>60</td><td>4</td></tr>
+                            <tr><td>4. Same text, same label → keep the first row</td><td>1</td><td>0</td></tr>
+                            <tr><td><strong>Total</strong></td><td><strong>77</strong></td><td><strong>7</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="compare-table-card" style="margin-top: 0.9rem;">
+                <div class="title">Class distribution after filtering, count (%)</div>
+                <div class="table-scroll">
+                    <table class="ranking-table" aria-label="Class distribution per split">
+                        <thead>
+                            <tr><th class="model-col">class</th><th class="score-col">train</th><th class="score-col">val</th><th class="score-col">test</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="model-col">sadness</td><td class="score-col">4,661 (29.27)</td><td class="score-col">550 (27.60)</td><td class="score-col">581 (29.05)</td></tr>
+                            <tr><td class="model-col">joy</td><td class="score-col">5,340 (33.54)</td><td class="score-col">702 (35.22)</td><td class="score-col">695 (34.75)</td></tr>
+                            <tr><td class="model-col">love</td><td class="score-col">1,283 (8.06)</td><td class="score-col">176 (8.83)</td><td class="score-col">159 (7.95)</td></tr>
+                            <tr><td class="model-col">anger</td><td class="score-col">2,152 (13.52)</td><td class="score-col">274 (13.75)</td><td class="score-col">275 (13.75)</td></tr>
+                            <tr><td class="model-col">fear</td><td class="score-col">1,923 (12.08)</td><td class="score-col">211 (10.59)</td><td class="score-col">224 (11.20)</td></tr>
+                            <tr><td class="model-col">surprise</td><td class="score-col">564 (3.54)</td><td class="score-col">80 (4.01)</td><td class="score-col">66 (3.30)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="callout">
+                <strong>Checks passed:</strong> no train–val, train–test or val–test overlap; no repeated text inside train or val;
+                ≥ 5,000 train rows; all six classes in every split.
+                <strong>Limitation:</strong> 14 test rows belong to conflicting-label groups and keep their released labels,
+                and all 5 train–val overlaps had conflicting labels, so the 5 kept validation copies carry disputed labels too.
+            </div>
+        </section>
+
+        <!-- ═══════════════ 04 MODELS ═══════════════ -->
+        <section class="section-card reveal" id="models">
+            <div class="section-head">
+                <span class="idx">04</span>
+                <h2>Methodology: baseline and pretrained models</h2>
+            </div>
+            <p>
+                A lexical baseline shows how far word and bigram counts go on this data; the EDA (section 02) suggested labels
+                follow emotion keywords, so a strong baseline was expected. DistilBERT is the pretrained model from the
+                approved plan: it reads the whole text in context (word order, negation). BERT is the larger encoder it was
+                distilled from. All three use the same filtered splits and the same minimal text (<code>text_min</code>:
+                NFC, lowercase, whitespace).
+            </p>
+            <figure class="card-figure" style="margin-top: 0.75rem;">
+                <div style="overflow-x: auto;">
+                <svg viewBox="0 0 900 190" role="img" aria-label="Pipeline diagram" style="width: 100%; min-width: 640px; height: auto; display: block;">
+                    <defs>
+                        <marker id="pipeArrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                            <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"></path>
+                        </marker>
+                    </defs>
+                    <g font-family="Inter, sans-serif" font-size="13" fill="var(--ink)" text-anchor="middle">
+                        <rect x="10" y="70" width="140" height="50" rx="10" fill="var(--panel)" stroke="var(--line)"></rect>
+                        <text x="80" y="92">dair-ai/emotion</text><text x="80" y="110" font-size="11" fill="var(--muted)">pinned revision</text>
+                        <rect x="180" y="70" width="140" height="50" rx="10" fill="var(--panel)" stroke="var(--line)"></rect>
+                        <text x="250" y="92">Filtering rules 1–4</text><text x="250" y="110" font-size="11" fill="var(--muted)">15,923 / 1,993 / 2,000</text>
+                        <rect x="350" y="70" width="120" height="50" rx="10" fill="var(--panel)" stroke="var(--line)"></rect>
+                        <text x="410" y="92">text_min</text><text x="410" y="110" font-size="11" fill="var(--muted)">NFC · lower · spaces</text>
+                        <rect x="510" y="15" width="200" height="50" rx="10" fill="var(--panel)" stroke="var(--accent)"></rect>
+                        <text x="610" y="37">TF-IDF (1,2) → LogReg</text><text x="610" y="55" font-size="11" fill="var(--muted)">CPU · balanced weights</text>
+                        <rect x="510" y="125" width="200" height="50" rx="10" fill="var(--panel)" stroke="var(--accent)"></rect>
+                        <text x="610" y="147">WordPiece → DistilBERT / BERT</text><text x="610" y="165" font-size="11" fill="var(--muted)">T4 GPU · weighted CE · 3 seeds</text>
+                        <rect x="750" y="70" width="140" height="50" rx="10" fill="var(--panel)" stroke="var(--line)"></rect>
+                        <text x="820" y="92">Select on val</text><text x="820" y="110" font-size="11" fill="var(--muted)">Macro-F1 → test once</text>
+                    </g>
+                    <g stroke="var(--muted)" stroke-width="1.6" fill="none" marker-end="url(#pipeArrow)">
+                        <path d="M150 95 H178"></path><path d="M320 95 H348"></path>
+                        <path d="M470 95 C490 95 490 40 508 40"></path><path d="M470 95 C490 95 490 150 508 150"></path>
+                        <path d="M710 40 C730 40 730 95 748 95"></path><path d="M710 150 C730 150 730 95 748 95"></path>
+                    </g>
+                </svg>
+                </div>
+                <figcaption>Pipeline: data → filtering → minimal text → two model families → selection on validation Macro-F1 → one final test evaluation.</figcaption>
+            </figure>
+            <div class="grid-2" style="margin-top: 0.9rem;">
+                <div class="backbone-card">
+                    <div class="head"><span>TF-IDF + Logistic Regression</span><span>Baseline</span></div>
+                    <figure class="card-figure metric-plot wide-plot">
+                        <img src="site/assets/images/a2_arch_tfidf_lr.svg" alt="TF-IDF + Logistic Regression architecture">
+                        <figcaption>TF-IDF + Logistic Regression architecture.</figcaption>
+                    </figure>
+                </div>
+                <div class="backbone-card">
+                    <div class="head"><span>BERT base + DistilBERT</span><span>Pretrained</span></div>
+                    <figure class="card-figure metric-plot wide-plot">
+                        <img src="site/assets/images/a2_arch_bert_distilbert.svg" alt="BERT base and DistilBERT architectures">
+                        <figcaption>BERT base vs DistilBERT. Pink = new layers trained from scratch; the rest is pretrained.</figcaption>
+                    </figure>
+                </div>
+            </div>
+            <div class="callout">
+                <strong>Why BERT:</strong> time remained before the final milestone, so BERT was added after the proposal
+                and trained with exactly the same recipe as the DistilBERT full fine-tune, to see what a larger model
+                (12 instead of 6 layers) changes in accuracy and cost. It is a second controlled experiment: only the
+                pretrained model changes. Because the model changes as a whole, it shows whether BERT differs, not which
+                part (depth, pretrained pooler, distillation) causes it. Both models are fine-tuned with three seeds (42, 43, 44),
+                so differences can be compared with the run-to-run spread.
+            </div>
+            <div class="compare-table-card" style="margin-top: 0.9rem;">
+                <div class="title">Model summary</div>
+                <div class="table-scroll">
+                    <table class="info-table">
+                        <thead><tr><th></th><th>TF-IDF + LR</th><th>DistilBERT</th><th>BERT</th></tr></thead>
+                        <tbody>
+                            <tr><td>Input</td><td>Sparse TF-IDF vector (uni + bigrams)</td><td>WordPiece tokens, MAX_LEN 128</td><td>Same WordPiece vocabulary and MAX_LEN as DistilBERT</td></tr>
+                            <tr><td>Loss</td><td>Cross-entropy, balanced class weights</td><td>Weighted cross-entropy</td><td>Weighted cross-entropy</td></tr>
+                            <tr><td>Parameters</td><td>196,662</td><td>66,958,086</td><td>109,486,854</td></tr>
+                            <tr><td>Self-implemented</td><td>Filtering, features pipeline, class-weight test (scikit-learn models)</td><td colspan="2">Data loader, training loop, weighted loss, two learning rates, checkpoint selection (Hugging Face pretrained weights)</td></tr>
+                            <tr><td>Libraries</td><td>scikit-learn</td><td>PyTorch, Hugging Face Transformers</td><td>PyTorch, Hugging Face Transformers</td></tr>
+                            <tr><td>Hardware</td><td>Colab CPU, Intel Xeon @ 2.00GHz (2 vCPU)</td><td>Colab Tesla T4 (14.6 GB)</td><td>Colab Tesla T4 (14.6 GB)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════ 05 SETUP & TRAINING ═══════════════ -->
+        <section class="section-card reveal" id="training">
+            <div class="section-head">
+                <span class="idx">05</span>
+                <h2>Experimental setup and training behaviour</h2>
+            </div>
+            <div class="compare-table-card">
+                <div class="title">Training setup</div>
+                <div class="table-scroll">
+                    <table class="info-table">
+                        <tbody>
+                            <tr><th>Optimizer / learning rate</th><td>Transformers: AdamW, 2e-5 for the pretrained encoder and 1e-4 for the new head. Baseline: logistic regression (lbfgs), C = 1.0</td></tr>
+                            <tr><th>Loss</th><td>Cross-entropy with balanced class weights computed on train (surprise ×4.71, joy ×0.50)</td></tr>
+                            <tr><th>Batch size / epochs</th><td>16 / 3 (996 steps per epoch, 2,988 in total)</td></tr>
+                            <tr><th>Scheduler / warmup</th><td>Linear warmup over the first 10% of steps (298), then linear decay to 0</td></tr>
+                            <tr><th>Regularization / early stopping</th><td>Weight decay 0.01, gradient clipping at 1.0, the models' default dropout; no early stopping, the best epoch is kept</td></tr>
+                            <tr><th>Checkpoint criterion</th><td>Best validation Macro-F1</td></tr>
+                            <tr><th>Seed</th><td>42 for every run; DistilBERT and BERT full fine-tune repeated with seeds 43 and 44 (mean ± std over three seeds)</td></tr>
+                            <tr><th>Hardware / software</th><td>Colab Tesla T4 14.6 GB, Intel Xeon 2 vCPU, 12.7 GB RAM; Python 3.13.16, PyTorch 2.11.0+cu130, Transformers 5.20.2, scikit-learn 1.6.1</td></tr>
+                            <tr><th>Hyperparameter selection</th><td>Not tuned: standard BERT fine-tuning values, identical for both transformers. Class weights were chosen on validation with the baseline (Macro-F1 0.8489 on vs 0.7527 off)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p style="margin-top: 0.9rem;">
+                Main run (seed 42) of each transformer. Training loss falls from 0.67 (DistilBERT) and 0.80 (BERT) in epoch 1,
+                an average that includes the steps with a still-random head, to about 0.12 in epoch 3; validation loss falls
+                from 0.24–0.25 to about 0.20. Validation Macro-F1 rises over the epochs; the saved epoch is 3 for DistilBERT
+                and 2 for BERT (0.9200, then 0.9154 at epoch 3). Over all six transformer runs, validation loss rose again at
+                epoch 3 in three runs (DistilBERT seeds 43 and 44, BERT seed 44) while Macro-F1 still improved, and the
+                selected epoch is the last one in five of six runs. Three epochs therefore look close to the useful limit,
+                with no strong overfitting; longer training was not tested.
+            </p>
+            <figure class="card-figure metric-plot wide-plot" style="margin-top: 0.75rem;">
+                <img src="site/assets/images/a2_curves.png" alt="Training curves: loss, validation Macro-F1 and learning rate">
+                <figcaption>Left: train and validation loss. Middle: validation Macro-F1, circled = saved epoch, dotted = baseline. Right: learning rate per step for the head and the encoder; dots = head LR logged at the end of each epoch. Solid = DistilBERT, dash-dot = BERT.</figcaption>
+            </figure>
+        </section>
+
+        <!-- ═══════════════ 06 RESULTS ═══════════════ -->
+        <section class="section-card reveal" id="comparison">
+            <div class="section-head">
+                <span class="idx">06</span>
+                <h2>Results and comparison</h2>
+            </div>
+            <p>
+                <strong>Preliminary (M2): validation set only.</strong> The test set is evaluated once, after model selection,
+                in the final milestone. Filter by model or setup and sort by any column. Green = best, light = second best in
+                each column. Seeds 43 and 44 repeat the full fine-tunes with a different seed only.
+            </p>
+
+            <div class="training-tabs" aria-label="Split filter">
+                <button class="filter-btn" data-filter="test">Test (final)</button>
+                <button class="filter-btn active" data-filter="val">Validation</button>
+                <button class="filter-btn" data-filter="all">All</button>
+            </div>
+
+            <div class="comparison-controls" aria-label="Comparison controls">
+                <div class="comparison-control">
+                    <label for="modelFilter">Model</label>
+                    <select id="modelFilter"><option value="all">All</option></select>
+                </div>
+                <div class="comparison-control">
+                    <label for="setupFilter">Setup</label>
+                    <select id="setupFilter"><option value="all">All</option></select>
+                </div>
+                <div class="comparison-control">
+                    <label for="sortMetric">Sort metric</label>
+                    <select id="sortMetric">
+                        <option value="default">Default</option>
+                        <option value="macroF1">Macro-F1</option>
+                        <option value="acc">Accuracy</option>
+                        <option value="trainTime">Train time</option>
+                        <option value="inferMs">Inference (ms/sample)</option>
+                        <option value="totalParams">Params</option>
+                        <option value="sizeMb">Size (MB)</option>
+                    </select>
+                </div>
+                <div class="comparison-control">
+                    <label for="sortDirection">Direction</label>
+                    <select id="sortDirection">
+                        <option value="desc">Descending</option>
+                        <option value="asc">Ascending</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="compare-table-card" id="comparisonCard">
+                <div class="title" id="comparisonTitle">All runs</div>
+                <div class="table-scroll">
+                    <table class="ranking-table" aria-label="Results of all runs">
+                        <thead>
+                            <tr>
+                                <th class="model-col">Model</th>
+                                <th>Text</th>
+                                <th>Setup</th>
+                                <th>Seed</th>
+                                <th>Split</th>
+                                <th class="score-col up">Macro-F1 (%)</th>
+                                <th class="score-col up">Acc (%)</th>
+                                <th class="cost-col down">Train time (s)</th>
+                                <th class="cost-col down">Inference (ms/sample)</th>
+                                <th class="cost-col down">Params (M)</th>
+                                <th class="cost-col down">Size (MB)</th>
+                                <th>Hardware</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="table-legend">
+                    <span class="legend-chip top1">Best in column</span>
+                    <span class="legend-chip top2">Second best</span>
+                </div>
+            </div>
+            <p class="comparison-empty" id="comparisonEmpty" style="display: none;">No run matches the current filters.</p>
+
+            <h3 style="margin-top: 1rem; font-size: 1.02rem;">Comparison and discussion</h3>
+            <p>
+                <strong>Transformers vs baseline.</strong> DistilBERT reaches Macro-F1 0.9155 ± 0.0020 (three seeds) against
+                0.8489 for the baseline, +0.067, with accuracy 0.9373 vs 0.8751. It is better on all six classes, most on the
+                two classes where the baseline is weakest: surprise (+0.086) and fear (+0.081). Text by text (seed 42),
+                DistilBERT alone is right on 162 validation texts and the baseline alone on 38 (McNemar p &lt; 0.001). The gain
+                costs about 44× the training time (4.2 min on a T4 GPU vs 5.8 s on CPU), 340× the trainable parameters, 115×
+                the file size, and one to two orders of magnitude slower prediction (1.4 ms vs 0.02–0.07 ms per text; the
+                baseline's CPU timing varied between measurements).
+            </p>
+            <p>
+                <strong>BERT vs DistilBERT.</strong> BERT reaches 0.9163 ± 0.0032 against 0.9155 ± 0.0020. With the same
+                seed, the difference is +0.0051, −0.0033 and +0.0005 (mean +0.0008), smaller than the seed-to-seed spread of
+                either model; text by text (seed 42) BERT alone is right on 56 texts and DistilBERT alone on 47
+                (McNemar p ≈ 0.43). On this data there is no evidence that BERT is better, while it trains 2.0× and predicts
+                2.2× slower with 1.6× the parameters, so DistilBERT is the better trade-off. Caveats: validation only, three
+                seeds per model, one untuned recipe for both.
+            </p>
+
+            <div class="grid-2" style="margin-top: 0.75rem;">
+                <div class="compare-table-card">
+                    <div class="title">Validation Macro-F1 over seeds</div>
+                    <div class="table-scroll">
+                        <table class="info-table">
+                            <thead><tr><th>Model / setup</th><th>Runs</th><th>Mean</th><th>Std</th><th>Min–max</th></tr></thead>
+                            <tbody>
+                                <tr><td>BERT, full fine-tune</td><td>3</td><td>0.9163</td><td>0.0032</td><td>0.9145–0.9200</td></tr>
+                                <tr><td>DistilBERT, full fine-tune</td><td>3</td><td>0.9155</td><td>0.0020</td><td>0.9140–0.9178</td></tr>
+                                <tr><td>TF-IDF + LR, class weights on</td><td>1</td><td>0.8489</td><td>–</td><td>–</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="compare-table-card">
+                    <div class="title">Per-class F1 on validation (seed 42)</div>
+                    <div class="table-scroll">
+                        <table class="info-table">
+                            <thead><tr><th>Class (n)</th><th>TF-IDF + LR</th><th>DistilBERT</th><th>BERT</th></tr></thead>
+                            <tbody>
+                                <tr><td>sadness (550)</td><td>0.8959</td><td>0.9616</td><td>0.9579</td></tr>
+                                <tr><td>joy (702)</td><td>0.9004</td><td>0.9561</td><td>0.9621</td></tr>
+                                <tr><td>love (176)</td><td>0.8354</td><td>0.8853</td><td>0.9112</td></tr>
+                                <tr><td>anger (274)</td><td>0.8800</td><td>0.9375</td><td>0.9440</td></tr>
+                                <tr><td>fear (211)</td><td>0.8124</td><td>0.8929</td><td>0.8905</td></tr>
+                                <tr><td>surprise (80)</td><td>0.7692</td><td>0.8554</td><td>0.8541</td></tr>
+                                <tr><td>Macro avg</td><td>0.8489</td><td>0.9148</td><td>0.9200</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <figure class="card-figure metric-plot wide-plot" style="margin-top: 0.75rem;">
+                <img src="site/assets/images/a2_top_features_tfidf.png" alt="Top TF-IDF features per class">
+                <figcaption>Highest-weight TF-IDF features per class (baseline): almost all are single emotion adjectives, consistent with a lexical model already reaching 0.85 Macro-F1.</figcaption>
+            </figure>
+
+            <h3 style="margin-top: 1rem; font-size: 1.02rem;">Confusion matrices (validation, seed 42)</h3>
+            <div class="confusion-gallery" style="margin-top: 0.75rem;">
+                <figure class="card-figure metric-plot">
+                    <img src="site/assets/images/a2_cm_val_tfidf_lr_min_cw.png" alt="Validation confusion matrix TF-IDF + LR">
+                    <figcaption>TF-IDF + LR (class weights on)</figcaption>
+                </figure>
+                <figure class="card-figure metric-plot">
+                    <img src="site/assets/images/a2_cm_val_distil_full_min.png" alt="Validation confusion matrix DistilBERT">
+                    <figcaption>DistilBERT, full fine-tune</figcaption>
+                </figure>
+                <figure class="card-figure metric-plot">
+                    <img src="site/assets/images/a2_cm_val_bert_full_min.png" alt="Validation confusion matrix BERT">
+                    <figcaption>BERT, full fine-tune</figcaption>
+                </figure>
+            </div>
+            <p style="margin-top: 0.6rem;">Colour = share of the true class (the diagonal is recall); numbers = counts. Test-set matrices follow in the final milestone.</p>
+        </section>
+
+        <!-- ═══════════════ 07 CONTROLLED EXPERIMENT ═══════════════ -->
+        <section class="section-card reveal" id="ablation">
+            <div class="section-head">
+                <span class="idx">07</span>
+                <h2>Controlled experiments</h2>
+            </div>
+            <p>
+                Two controlled experiments, each changing one factor while everything else stays fixed (data, filtered splits,
+                <code>text_min</code>, MAX_LEN, batch order, learning rates, epochs, warmup, class weights, seeds 42/43/44).
+                Results are compared by the mean over three seeds against the seed-to-seed spread, never by one run.
+            </p>
+
+            <h3 style="margin-top: 1rem; font-size: 1.02rem;">Experiment 1 (main): DistilBERT frozen encoder vs full fine-tune — planned for the final milestone</h3>
+            <div class="design-grid">
+                <div class="design-item"><div class="label">Hypothesis</div>Training only the head on a frozen encoder gives lower Macro-F1 than full fine-tuning: the pretrained [CLS] vector was not trained to summarise emotion, and the head has only 595,206 parameters.</div>
+                <div class="design-item"><div class="label">Changed factor</div>Encoder frozen (0.89% of parameters trained) vs fully fine-tuned (66,958,086)</div>
+                <div class="design-item"><div class="label">Fixed factors</div>Model, data, text, MAX_LEN, batch order, head learning rate, schedule, 3 epochs, class weights, seeds</div>
+                <div class="design-item"><div class="label">Metrics</div>Validation Macro-F1 and Accuracy (mean ± std over 3 seeds), training time</div>
+                <div class="design-item"><div class="label">Decision criterion</div>Agreed by the group before the frozen runs start (allowed Macro-F1 loss for the saved training time)</div>
+            </div>
+            <div class="callout">
+                <strong>Status:</strong> full fine-tune runs done (0.9155 ± 0.0020); frozen-encoder runs follow in the final milestone.
+            </div>
+
+            <h3 style="margin-top: 1rem; font-size: 1.02rem;">Experiment 2: BERT vs DistilBERT (both full fine-tune)</h3>
+            <div class="design-grid">
+                <div class="design-item"><div class="label">Question</div>Does a larger pretrained encoder (12 vs 6 layers, 1.6× the parameters) improve Macro-F1 enough to justify its cost?</div>
+                <div class="design-item"><div class="label">Changed factor</div>Pretrained model: bert-base-uncased vs distilbert-base-uncased</div>
+                <div class="design-item"><div class="label">Fixed factors</div>Identical token ids, data, text, recipe and seeds; no tuning for either model</div>
+                <div class="design-item"><div class="label">Metrics</div>Validation Macro-F1 and Accuracy (mean ± std, paired by seed), train time, ms per text</div>
+                <div class="design-item"><div class="label">Decision criterion</div>A difference counts only if it is larger than the seed-to-seed spread and has the same sign for every seed</div>
+            </div>
+            <div class="callout">
+                <strong>Result (validation):</strong> BERT 0.9163 ± 0.0032 vs DistilBERT 0.9155 ± 0.0020; paired differences
+                +0.0051, −0.0033, +0.0005 (mean +0.0008). The criterion is not met, so BERT is not shown to be better, while it
+                costs 2.0× the training time and 2.2× the inference time. Limitation: "the model" bundles depth, BERT's
+                pretrained pooler and distillation, so the experiment says whether BERT differs, not which part would cause it.
+            </div>
+            <p style="margin-top: 0.75rem;">
+                <strong>Extra ablation (baseline, validation):</strong> balanced class weights raised Macro-F1 from 0.7527 to
+                0.8489 and surprise recall from 0.40 to 0.81, so they are used by every model. Stopwords removed vs kept for the
+                baseline follows in the final milestone.
+            </p>
+        </section>
+
+        <!-- ═══════════════ 08 ERROR ANALYSIS ═══════════════ -->
+        <section class="section-card reveal" id="errors">
+            <div class="section-head">
+                <span class="idx">08</span>
+                <h2>Error analysis</h2>
+            </div>
+            <p>
+                <strong>Planned for the final milestone:</strong> errors on the test set, grouped from
+                <code>errors_&lt;run&gt;.csv</code> with real examples. <strong>Preliminary view</strong> from the validation
+                confusion matrices of the seed-42 runs: counts below are texts of the true class predicted as the other class.
+                Causes are hypotheses to check, not results.
+            </p>
+            <div class="compare-table-card" style="margin-top: 0.75rem;">
+                <div class="title">Most frequent confusions on validation (TF-IDF + LR / DistilBERT / BERT)</div>
+                <div class="table-scroll">
+                    <table class="info-table">
+                        <thead><tr><th>Group</th><th>Description</th><th>Count (val)</th><th>Hypothesised cause</th><th>Improvement idea</th></tr></thead>
+                        <tbody>
+                            <tr><td>joy → love</td><td>Joy texts predicted as love; the largest error of the baseline and DistilBERT</td><td>38 / 33 / 13 of 702 joy texts; reverse love → joy 6 / 6 / 16</td><td>Overlapping wording of the two emotions; class weights (love ×2.07, joy ×0.50) may push unclear texts to love</td><td>Read the examples; compare with a run without class weights</td></tr>
+                            <tr><td>→ surprise</td><td>Fear and joy texts predicted as surprise</td><td>fear → surprise 15 / 7 / 16; joy → surprise 6 / 8 / 9</td><td>Words such as "overwhelmed", "shocked", "strange" fit both; surprise has the largest weight (×4.71)</td><td>BERT predicts surprise too often (precision 0.75, recall 0.99): check its examples</td></tr>
+                            <tr><td>sadness ↔ anger</td><td>Negative emotions confused with each other</td><td>sadness → anger 16 / 8 / 2; anger → sadness 10 / 10 / 16</td><td>Texts that express both hurt and annoyance</td><td>Group the examples by the emotion words they contain</td></tr>
+                            <tr><td>sadness → fear</td><td>Sad texts predicted as fear; barely changed by the transformers</td><td>16 / 15 / 8 of 550 sadness texts</td><td>Words like "anxious", "worried" sit between the two classes</td><td>Check whether the labels of these texts are consistent</td></tr>
+                            <tr><td>Negation</td><td>Negated texts labelled by the emotion word ("i do not feel reassured" → joy)</td><td>Two examples seen in the EDA; to be counted</td><td>Labels follow keywords, not meaning</td><td>Count negated texts and the error rate on them</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p style="margin-top: 0.6rem;">
+                DistilBERT removes most of the baseline's scattered errors (sadness texts predicted wrong: 68 → 24) but not
+                joy → love or sadness → fear. BERT moves errors rather than removing them: it cuts joy → love from 33 to 13 but
+                adds love → joy and over-predicts surprise, ending with almost the same number of correct texts (1,877 vs 1,868).
+            </p>
+        </section>
+
+        <!-- ═══════════════ 09 CONCLUSION ═══════════════ -->
+        <section class="section-card reveal" id="conclusion">
+            <div class="section-head">
+                <span class="idx">09</span>
+                <h2>Limitations and conclusion</h2>
+            </div>
+            <p><strong>Limitations.</strong> <em>Data:</em> labels are machine-generated; 51 of 52 repeated-text groups had
+            conflicting labels, and 14 test rows keep their disputed released labels; texts have no apostrophes ("I'll" appears
+            as <em>ill</em>); there are no author IDs, so near-duplicates by the same writer cannot be detected.
+            <em>Method:</em> one recipe for both transformers, not tuned; three epochs only, and the best epoch was the last
+            one in five of six runs. <em>Experiments:</em> results so far are on validation only, with three seeds per
+            transformer and one run for the baseline; timings are single measurements and the baseline ran on CPU while the
+            transformers ran on GPU.</p>
+            <p><strong>Conclusion (preliminary).</strong> A fine-tuned transformer clearly beats a strong lexical baseline
+            (Macro-F1 0.9155 vs 0.8489 on validation), with the largest gains on the smallest classes, at a much higher
+            compute cost. A larger encoder (BERT) does not improve on DistilBERT here, so DistilBERT is the better trade-off.
+            Next: the frozen-encoder experiment, one final test evaluation of the selected models, error analysis with
+            examples, and a cost table with repeated timing.</p>
+        </section>
+
+        <!-- ═══════════════ 10 RESOURCES ═══════════════ -->
+        <section class="section-card reveal" id="resources">
+            <div class="section-head">
+                <span class="idx">10</span>
+                <h2>Code, checkpoints, report and video</h2>
+            </div>
+            <div class="link-grid">
+                <a class="link-card" href="https://github.com/volethanhtrieu/DL_Assignment-02" target="_blank" rel="noopener"><span>Source code<small>GitHub repository</small></span><span>↗</span></a>
+                <a class="link-card" href="#TODO" target="_blank" rel="noopener"><span>Notebook<small>Open in Colab</small></span><span>↗</span></a>
+                <a class="link-card" href="#TODO" target="_blank" rel="noopener"><span>Checkpoints<small>Google Drive / HF Hub, or reproduction steps</small></span><span>↗</span></a>
+                <a class="link-card" href="#TODO" target="_blank" rel="noopener"><span>Report (PDF)<small>GroupGoat_A2_Report.pdf</small></span><span>↗</span></a>
+                <a class="link-card" href="#TODO" target="_blank" rel="noopener"><span>Slides<small>PDF or Google Slides</small></span><span>↗</span></a>
+                <a class="link-card" href="assignment02-m1.html"><span>M1 Dataset Proposal<small>Approval status: <span class="todo">TODO</span></small></span><span>→</span></a>
+            </div>
+            <p style="margin-top: 0.75rem;">Presentation video: final milestone.</p>
+            <!-- Final milestone: uncomment and replace VIDEO_ID. Title format: CO3133-Semester-261 – Group [ID] – Assignment 2
+            <iframe class="video-frame" src="https://www.youtube.com/embed/VIDEO_ID" title="Assignment 2 presentation video" loading="lazy" allowfullscreen></iframe>
+            -->
+        </section>
+
+        <!-- Optional: live demo (Gradio / HF Space). Uncomment if the group deploys one.
+        <section class="section-card reveal" id="live-demo">
+            <div class="section-head"><span class="idx">11</span><h2>Live demo</h2></div>
+            <div class="demo-hf-wrap">
+                <iframe class="demo-hf-iframe" src="https://SPACE.hf.space" title="Demo" loading="lazy" allowfullscreen></iframe>
+            </div>
+        </section>
+        -->
+
+        <footer class="site-footer">Group Goat · Assignment 02 · CO3133</footer>
+    </div>
+
+    <div class="lightbox" id="lightbox" aria-hidden="true">
+        <span class="lightbox-close" id="lightboxClose">&times;</span>
+        <img id="lightboxImage" alt="Preview">
+    </div>
+
+    <div class="text-modal" id="sampleTextModal" aria-hidden="true">
+        <div class="text-modal-card" role="dialog" aria-modal="true" aria-labelledby="sampleTextTitle">
+            <div class="text-modal-head">
+                <h4 id="sampleTextTitle">Text samples from the notebook output</h4>
+                <button class="text-modal-close" id="closeSampleText" type="button">&times;</button>
+            </div>
+            <pre class="text-modal-body">sadness   i didnt feel humiliated
+sadness   i can go from feeling so hopeless to so damned hopeful just from being around someone who cares and is awake
+anger     im grabbing a minute to post i feel greedy wrong
+anger     i am feeling grouchy
+love      i am ever feeling nostalgic about the fireplace i will know that it is still on the property
+
+Negated texts labelled by the emotion word:
+joy       i do not feel reassured anxiety is on each side
+joy       i am not sure what would make me feel content if anything
+
+Same text, different labels (removed from train; the test copy stays):
+train sadness / test anger   i am feeling stressed and more than a bit anxious
+train joy / train love       i am not amazing or great at photography but i feel passionate about it</pre>
+        </div>
+    </div>
+
+    <script>
+        // ---------- Reading progress bar ----------
+        const progressBar = document.getElementById("progressBar");
+        window.addEventListener("scroll", () => {
+            const height = document.documentElement.scrollHeight - window.innerHeight;
+            const percent = height > 0 ? (window.scrollY / height) * 100 : 0;
+            progressBar.style.width = percent + "%";
+        });
+
+        // ---------- Reveal sections on scroll ----------
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) entry.target.classList.add("visible");
+            });
+        }, { threshold: 0.12 });
+        document.querySelectorAll(".reveal").forEach((item) => sectionObserver.observe(item));
+
+        // ---------- Highlight the current section in the TOC ----------
+        const tocLinks = document.querySelectorAll("#toc a");
+        const sections = Array.from(document.querySelectorAll("section[id]"));
+        window.addEventListener("scroll", () => {
+            const y = window.scrollY + 180;
+            let current = sections[0]?.id || "";
+            sections.forEach((sec) => {
+                if (y >= sec.offsetTop) current = sec.id;
+            });
+            tocLinks.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + current));
+        });
+
+        // ---------- Tabs (scoped to their own section, so several tab groups can coexist) ----------
+        document.querySelectorAll(".tab-btn").forEach((tab) => {
+            tab.addEventListener("click", () => {
+                const scope = tab.closest("section");
+                scope.querySelectorAll(".tab-btn").forEach((t) => t.classList.remove("active"));
+                tab.classList.add("active");
+                scope.querySelectorAll(".tab-panel").forEach((panel) => {
+                    panel.classList.toggle("active", panel.dataset.panel === tab.dataset.tab);
+                });
+            });
+        });
+
+        // ---------- Results table ----------
+        // One object per run and split. Generate with: python scripts/results_to_js.py results/results.csv
+        // Only real numbers from results/results.csv go here.
+        const comparisonRows = [
+            // From results/results.csv (exported by the notebook, 2026-10-27); seed added from the same file
+            {"order": 0, "run": "tfidf_lr_min_nocw", "model": "TF-IDF + LR", "text": "Minimal", "setup": "class weights off", "seed": null, "split": "val", "acc": 0.828901154039137, "macroF1": 0.7527342595554116, "weightedF1": 0.8187253644238661, "trainTime": 7.17, "inferMs": 0.0276, "totalParams": 196662, "sizeMb": 2.23, "hardware": "CPU: Intel(R) Xeon(R) CPU @ 2.00GHz"},
+            {"order": 1, "run": "tfidf_lr_min_cw", "model": "TF-IDF + LR", "text": "Minimal", "setup": "class weights on", "seed": null, "split": "val", "acc": 0.875062719518314, "macroF1": 0.8488832946968711, "weightedF1": 0.8760204787201603, "trainTime": 5.79, "inferMs": 0.0244, "totalParams": 196662, "sizeMb": 2.23, "hardware": "CPU: Intel(R) Xeon(R) CPU @ 2.00GHz"},
+            {"order": 2, "run": "distil_full_min", "model": "DistilBERT", "text": "Minimal", "setup": "full fine-tune", "seed": 42, "split": "val", "acc": 0.9372804816859006, "macroF1": 0.9148237737796282, "weightedF1": 0.938099737594917, "trainTime": 252.65, "inferMs": 1.3905, "totalParams": 66958086, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 3, "run": "distil_full_min_s43", "model": "DistilBERT", "text": "Minimal", "setup": "full fine-tune", "seed": 43, "split": "val", "acc": 0.9377822378324134, "macroF1": 0.917797585596631, "weightedF1": 0.9385037030660821, "trainTime": 245.92, "inferMs": 1.4063, "totalParams": 66958086, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 4, "run": "distil_full_min_s44", "model": "DistilBERT", "text": "Minimal", "setup": "full fine-tune", "seed": 44, "split": "val", "acc": 0.9367787255393879, "macroF1": 0.9140146962802804, "weightedF1": 0.9374874026028405, "trainTime": 251.24, "inferMs": 1.4153, "totalParams": 66958086, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 5, "run": "bert_full_min", "model": "BERT", "text": "Minimal", "setup": "full fine-tune", "seed": 42, "split": "val", "acc": 0.9417962870045158, "macroF1": 0.9199650870210424, "weightedF1": 0.9420399438717937, "trainTime": 502.63, "inferMs": 3.0624, "totalParams": 109486854, "sizeMb": 418.36, "hardware": "GPU: Tesla T4"},
+            {"order": 6, "run": "bert_full_min_s43", "model": "BERT", "text": "Minimal", "setup": "full fine-tune", "seed": 43, "split": "val", "acc": 0.9362769693928751, "macroF1": 0.9144762572869305, "weightedF1": 0.9370085717273564, "trainTime": 499.42, "inferMs": 3.0454, "totalParams": 109486854, "sizeMb": 418.36, "hardware": "GPU: Tesla T4"},
+            {"order": 7, "run": "bert_full_min_s44", "model": "BERT", "text": "Minimal", "setup": "full fine-tune", "seed": 44, "split": "val", "acc": 0.9367787255393879, "macroF1": 0.9144899650067341, "weightedF1": 0.9376362937184797, "trainTime": 499.67, "inferMs": 3.05, "totalParams": 109486854, "sizeMb": 418.36, "hardware": "GPU: Tesla T4"},
+        ];
+
+        // Columns that get best / second-best highlighting, and which direction is better
+        const highlightRules = [
+            { key: "macroF1", direction: "desc" },
+            { key: "acc", direction: "desc" },
+            { key: "trainTime", direction: "asc" },
+            { key: "inferMs", direction: "asc" },
+            { key: "totalParams", direction: "asc" },
+            { key: "sizeMb", direction: "asc" }
+        ];
+
+        const modelFilter = document.getElementById("modelFilter");
+        const setupFilter = document.getElementById("setupFilter");
+        const sortMetric = document.getElementById("sortMetric");
+        const sortDirection = document.getElementById("sortDirection");
+        const splitButtons = document.querySelectorAll("#comparison .filter-btn");
+        const tableBody = document.getElementById("comparisonTableBody");
+        const tableTitle = document.getElementById("comparisonTitle");
+        const tableEmpty = document.getElementById("comparisonEmpty");
+
+        function fillSelect(selectEl, values) {
+            values.forEach((value) => {
+                const option = document.createElement("option");
+                option.value = value;
+                option.textContent = value;
+                selectEl.appendChild(option);
+            });
+        }
+
+        // Filter options come from the data, so new models or setups appear automatically
+        fillSelect(modelFilter, [...new Set(comparisonRows.map((r) => r.model))]);
+        fillSelect(setupFilter, [...new Set(comparisonRows.map((r) => r.setup))]);
+
+        function highlightClasses(rows) {
+            // Returns { order: { key: "metric-top1" | "metric-top2" | "" } }
+            const classes = {};
+            rows.forEach((row) => { classes[row.order] = {}; });
+            highlightRules.forEach((rule) => {
+                const values = [...new Set(rows.map((r) => r[rule.key]))];
+                values.sort((a, b) => rule.direction === "asc" ? a - b : b - a);
+                rows.forEach((row) => {
+                    if (row[rule.key] === values[0]) classes[row.order][rule.key] = "metric-top1";
+                    else if (values.length > 1 && row[rule.key] === values[1]) classes[row.order][rule.key] = "metric-top2";
+                    else classes[row.order][rule.key] = "";
+                });
+            });
+            return classes;
+        }
+
+        function renderComparisonTable() {
+            const split = document.querySelector("#comparison .filter-btn.active")?.dataset.filter || "all";
+            const rows = comparisonRows
+                .filter((r) => split === "all" || r.split === split)
+                .filter((r) => modelFilter.value === "all" || r.model === modelFilter.value)
+                .filter((r) => setupFilter.value === "all" || r.setup === setupFilter.value);
+
+            if (sortMetric.value === "default") {
+                rows.sort((a, b) => a.order - b.order);
+            } else {
+                const sign = sortDirection.value === "asc" ? 1 : -1;
+                rows.sort((a, b) => sign * (a[sortMetric.value] - b[sortMetric.value]));
+            }
+
+            const classes = highlightClasses(rows);
+            tableTitle.textContent = `Runs (${rows.length} rows)`;
+            tableEmpty.style.display = rows.length ? "none" : "block";
+            tableBody.innerHTML = "";
+
+            rows.forEach((row) => {
+                const c = classes[row.order];
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="model-col">${row.model}</td>
+                    <td>${row.text}</td>
+                    <td>${row.setup}</td>
+                    <td>${row.seed ?? "–"}</td>
+                    <td>${row.split}</td>
+                    <td class="score-col ${c.macroF1}">${(row.macroF1 * 100).toFixed(2)}</td>
+                    <td class="score-col ${c.acc}">${(row.acc * 100).toFixed(2)}</td>
+                    <td class="cost-col ${c.trainTime}">${row.trainTime.toFixed(1)}</td>
+                    <td class="cost-col ${c.inferMs}">${row.inferMs.toFixed(3)}</td>
+                    <td class="cost-col ${c.totalParams}">${(row.totalParams / 1e6).toFixed(2)}</td>
+                    <td class="cost-col ${c.sizeMb}">${row.sizeMb.toFixed(2)}</td>
+                    <td>${row.hardware}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        splitButtons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+                splitButtons.forEach((b) => b.classList.remove("active"));
+                btn.classList.add("active");
+                renderComparisonTable();
+            });
+        });
+        [modelFilter, setupFilter, sortMetric, sortDirection].forEach((el) => el.addEventListener("change", renderComparisonTable));
+        renderComparisonTable();
+
+        // ---------- Missing images: show a striped placeholder instead of a broken icon ----------
+        function showPlaceholder(img) {
+            const placeholder = document.createElement("div");
+            placeholder.className = "img-placeholder";
+            placeholder.textContent = "Missing: " + img.getAttribute("src");
+            img.replaceWith(placeholder);
+        }
+
+        document.querySelectorAll("figure.card-figure img").forEach((img) => {
+            // The image may have failed before this script ran, so check both cases
+            if (img.complete && img.naturalWidth === 0) showPlaceholder(img);
+            else img.addEventListener("error", () => showPlaceholder(img));
+        });
+
+        // ---------- Image lightbox ----------
+        const lightbox = document.getElementById("lightbox");
+        const lightboxImage = document.getElementById("lightboxImage");
+
+        document.addEventListener("click", (event) => {
+            const target = event.target;
+            if (!(target instanceof HTMLImageElement) || !target.closest("figure.card-figure")) return;
+            lightboxImage.src = target.src;
+            lightboxImage.alt = target.alt;
+            lightbox.classList.add("open");
+            lightbox.setAttribute("aria-hidden", "false");
+        });
+
+        function closeLightbox() {
+            lightbox.classList.remove("open");
+            lightbox.setAttribute("aria-hidden", "true");
+            lightboxImage.src = "";
+        }
+
+        document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
+        lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
+
+        // ---------- Full text-sample modal ----------
+        const sampleTextModal = document.getElementById("sampleTextModal");
+        const openSampleText = document.getElementById("openSampleText");
+
+        function hideSampleTextModal() {
+            sampleTextModal.classList.remove("open");
+            sampleTextModal.setAttribute("aria-hidden", "true");
+        }
+
+        if (openSampleText) {
+            openSampleText.addEventListener("click", () => {
+                sampleTextModal.classList.add("open");
+                sampleTextModal.setAttribute("aria-hidden", "false");
+            });
+        }
+        document.getElementById("closeSampleText").addEventListener("click", hideSampleTextModal);
+        sampleTextModal.addEventListener("click", (e) => { if (e.target === sampleTextModal) hideSampleTextModal(); });
+
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "Escape") {
+                closeLightbox();
+                hideSampleTextModal();
+            }
+        });
+    </script>
+</body>
+</html>
