@@ -51,3 +51,23 @@
 
 The [M1 Dataset Proposal](https://github.com/volethanhtrieu/DL_Assignment-02/blob/main/M1_Dataset_Proposal_01.md) is **Draft — not submitted**. No instructor decision has been received. The deadline is **7 October 2026, 23:59 Asia/Ho_Chi_Minh (UTC+7)** unless a milestone-specific LMS announcement differs. Aim to finish human review by 6 October. No models were trained, no later milestones implemented, and nothing was pushed, published, or submitted.
 
+
+---
+
+## 🔄 Plan Update — 27 Oct 2026
+
+Because time remained before M3, the group added two things to the experiments. The [M1 Dataset Proposal](docs/M1_Dataset_Proposal_01.md) is **not changed**; this note records the update.
+
+| Change | What | Why |
+| :--- | :--- | :--- |
+| ➕ **BERT** (`bert-base-uncased`) | Full fine-tune with exactly the same recipe as DistilBERT (`text_min`, MAX_LEN 128, batch 16, 3 epochs, LR 2e-5 / 1e-4, warmup 10%, balanced class weights, checkpoint by validation Macro-F1) and the same seeds 42, 43, 44 (`bert_full_min`, `bert_full_min_s43`, `bert_full_min_s44`) | To see how BERT (12 layers, about 1.6× the parameters) differs from the DistilBERT full fine-tune in accuracy and cost. This is a **second controlled experiment**: only the pretrained model changes, everything else is fixed |
+| 🔁 **3 seeds for DistilBERT** | DistilBERT full fine-tune repeated with seeds 42, 43, 44 (`distil_full_min`, `distil_full_min_s43`, `distil_full_min_s44`); the frozen-backbone runs will use the same three seeds | One run cannot show run-to-run variation; mean ± std over seeds is the yardstick for every comparison |
+
+There are now two controlled experiments, each changing one factor:
+
+| | Changed factor | Kept fixed |
+| :--- | :--- | :--- |
+| **Main** | DistilBERT frozen backbone vs full fine-tune | model, data, text, recipe, seeds |
+| **Second** | Pretrained model: BERT vs DistilBERT (both full fine-tune, 3 seeds each) | data, `text_min`, MAX_LEN 128, identical token ids, batch order, learning rates, epochs, warmup, class weights, seeds |
+
+The second experiment changes the model as a whole (depth, pretrained pooler, distillation), so it shows *whether* BERT differs, not *which* of those parts causes it. All model selection uses the validation set; the test set is evaluated once, after selection.
