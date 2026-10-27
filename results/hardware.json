@@ -1,0 +1,15 @@
+{
+  "gpu": "Tesla T4",
+  "gpu_memory_gb": 14.6,
+  "cpu": "Intel(R) Xeon(R) CPU @ 2.00GHz",
+  "cpu_count": 2,
+  "ram_gb": 12.7,
+  "disk_free_gb": 70.1,
+  "python": "3.13.16",
+  "torch": "2.11.0+cu130",
+  "transformers": "5.20.2",
+  "sklearn": "1.6.1",
+  "datasets": "4.8.5",
+  "wandb": "0.28.1",
+  "seed": 42
+}
