@@ -4,7 +4,9 @@
 
 ### Emotion Classification — Dataset Proposal & Experiments
 
-**Group Goat** · CO3133 Deep Learning · Semester 261
+**Group Goat** · CO3133 Deep Learning and Its Applications · Semester 261
+
+**Instructor:** Lê Thành Sách · Ho Chi Minh City University of Technology — VNU-HCM
 
 ![Milestone](https://img.shields.io/badge/Milestone-M2%20Draft-yellow)
 ![M1](https://img.shields.io/badge/M1-Approved-brightgreen)
