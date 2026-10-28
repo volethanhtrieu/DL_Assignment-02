@@ -45,7 +45,7 @@
 | Member Name | Student ID | Assignment 02 Contribution (%) | Role & Responsibilities |
 | :--- | :---: | :---: | :--- |
 | Hoàng Trọng Huy Minh | 2452743 | **0%** | Assignment 1. |
-| **Võ Lê Thành Triệu** | **2453297** | **100%** | **M1 Dataset Proposal — wait for approval** |
+| **Võ Lê Thành Triệu** | **2453297** | **100%** | **Assignment 02** |
 | Nguyễn Huỳnh Nam Quốc | 2453089 | **0%** | Assignment 3. |
 
 ---
