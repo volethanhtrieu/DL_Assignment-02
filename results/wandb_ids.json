@@ -1,10 +1,14 @@
 {
-  "tfidf_lr_min_nocw": "qj08wkz3",
-  "tfidf_lr_min_cw": "tsa2peq3",
-  "distil_full_min": "jzslvovw",
-  "distil_full_min_s43": "y27wmzlf",
-  "distil_full_min_s44": "0fm9vcsi",
-  "bert_full_min": "85r9a9tm",
-  "bert_full_min_s43": "ru9xve8b",
-  "bert_full_min_s44": "mx3x8w6f"
+  "distil_full_min": "lnuy747a",
+  "tfidf_lr_min_nocw": "7wlsxtx8",
+  "tfidf_lr_min_cw": "pwfi016q",
+  "distil_full_min_s43": "psflj88c",
+  "distil_full_min_s44": "llw3bte9",
+  "bert_full_min": "ulss79nz",
+  "bert_full_min_s43": "pil00scg",
+  "bert_full_min_s44": "noxjos1c",
+  "distil_freeze_min": "7rugvdvg",
+  "distil_freeze_min_s43": "83s806pr",
+  "distil_freeze_min_s44": "k1uomhhg",
+  "tfidf_lr_aggr_cw": "3ojjzuey"
 }

@@ -4,12 +4,15 @@
   "cpu": "Intel(R) Xeon(R) CPU @ 2.00GHz",
   "cpu_count": 2,
   "ram_gb": 12.7,
-  "disk_free_gb": 70.1,
+  "disk_free_gb": 112.5,
   "python": "3.13.16",
-  "torch": "2.11.0+cu130",
-  "transformers": "5.20.2",
+  "torch": "2.14.1+cu130",
+  "transformers": "5.22.1",
   "sklearn": "1.6.1",
   "datasets": "4.8.5",
   "wandb": "0.28.1",
-  "seed": 42
+  "seed": 42,
+  "cuda": "13.0",
+  "cudnn": 92800,
+  "torch_cpu_threads": 1
 }

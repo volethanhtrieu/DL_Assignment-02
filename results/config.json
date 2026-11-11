@@ -1,0 +1,59 @@
+{
+  "dataset": {
+    "name": "dair-ai/emotion",
+    "config": "split",
+    "revision": "cab853a1dbdf4c42c2b3ef2173804746df8825fe",
+    "apply_filtering": true,
+    "rows": {
+      "train": 15923,
+      "val": 1993,
+      "test": 2000
+    }
+  },
+  "seed": 42,
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "transformer": {
+    "models": [
+      "distilbert-base-uncased",
+      "bert-base-uncased"
+    ],
+    "max_len": 128,
+    "batch_size": 16,
+    "epochs": 3,
+    "lr_backbone": 2e-05,
+    "lr_head": 0.0001,
+    "warmup_ratio": 0.1,
+    "weight_decay": 0.01,
+    "max_grad_norm": 1.0,
+    "checkpoint_rule": "epoch with the best val Macro-F1"
+  },
+  "baseline": {
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 2,
+    "max_df": 0.9,
+    "C": 1.0
+  },
+  "use_class_weights": true,
+  "freeze_max_drop": 0.02,
+  "error_analysis": {
+    "n_keywords": 20,
+    "n_examples": 3
+  },
+  "timing": {
+    "n_timing_repeats": 5,
+    "n_latency_texts": 100
+  },
+  "selection": {
+    "final_model": "DistilBERT",
+    "final_run": "distil_full_min",
+    "rule": "tie: |gap| 0.0008 < larger seed std 0.0032, the smaller model is kept",
+    "baseline": "tfidf_lr_aggr_cw"
+  }
+}

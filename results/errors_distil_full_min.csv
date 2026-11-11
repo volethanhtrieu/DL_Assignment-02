@@ -1,0 +1,147 @@
+orig_idx,text,true,pred,confidence,G1 joy <-> love,G2 sadness/anger/fear,G3 fear <-> surprise,other pair,G4 negation in text,G5 all models same wrong label,disputed,word evidence
+10,i don t feel particularly agitated,fear,anger,0.8011,False,True,False,False,True,True,False,no word of either class
+67,i feel a bit stressed even though all the things i have going on are fun,anger,sadness,0.5828,False,True,False,False,False,True,False,no word of either class
+72,i am right handed however i play billiards left handed naturally so me trying to play right handed feels weird,surprise,fear,0.866,False,False,True,False,False,False,False,word of the true class only
+86,i feel like i am in paradise kissing those sweet lips make me feel like i dive into a magical world of love,joy,love,0.6365,True,False,False,False,False,False,True,word of the predicted class only
+94,when a friend dropped a frog down my neck,anger,fear,0.8733,False,True,False,False,False,False,False,no word of either class
+98,i feel my heart is tortured by what i have done,anger,fear,0.57,False,True,False,False,False,False,False,no word of either class
+125,i feel very mislead by someone that i really really thought i knew and liked very much so,love,anger,0.998,False,False,False,True,False,False,False,word of the true class only
+131,im feeling generous today heres one more you may have already seen but is good for a chuckle,love,joy,0.877,True,False,False,False,False,True,False,no word of either class
+137,i actually feel agitated which led to a terrible day yesterday in which i was unable to concentrate on anything and basically piddled the day away,anger,fear,0.5494,False,True,False,False,False,False,False,no word of either class
+150,im feeling rather angsty and listless,sadness,joy,0.9641,False,False,False,True,False,False,False,no word of either class
+152,i was so uncomfortable and feeling weird feelings but wasn t sure if they were contractions since i never really felt contractions with jared until they jacked me up with pitocin,surprise,fear,0.5261,False,False,True,False,True,False,False,word of the true class only
+188,i feel kinda weird when andrea tries to talk to me about chris,fear,surprise,0.5412,False,False,True,False,False,True,False,word of the predicted class only
+193,i really dont like quinn because i feel like she will just end up hurting barney and i hated the lame ted robin storyline,anger,sadness,0.963,False,True,False,False,True,True,False,no word of either class
+232,i left my garmin on my bike so i was going to have to do this by feel coming out of transition its amazing hearing cheers and your adrenaline is just going crazy,joy,surprise,0.892,False,False,False,True,False,False,False,word of the predicted class only
+234,i love to dance but often feel inhibited by my own body unsure what i am capable of hyper concerned about other people watching me and having opinions on my style or just feeling awkward as if i have no idea what i am supposed to do here,fear,sadness,0.8208,False,True,False,False,True,False,False,words of both classes
+262,i realized what i am passionate about helping women feel accepted and appreciated,joy,love,0.6651,True,False,False,False,False,False,True,word of the predicted class only
+290,i just feel are ludicrous and wasting space or so trite they should have looked at the book first and come up with something a little more original,surprise,sadness,0.6053,False,False,False,True,False,False,False,word of the true class only
+305,i have a lot going on in my life and feel overwhelmed,fear,surprise,0.7145,False,False,True,False,False,True,False,word of the predicted class only
+306,i took for granted a few weeks ago is really weird and makes me feel really agitated and frustrated,anger,fear,0.7308,False,True,False,False,False,False,False,no word of either class
+314,i will nolonger tell anybody how i feel or what im thinking cause all it seems to do is get me more hated than i already am,sadness,anger,0.8713,False,True,False,False,False,False,False,no word of either class
+319,i indicated then i was feeling quite overwhelmed with work responsibilities teaching traveling and writing,fear,surprise,0.9479,False,False,True,False,False,True,False,word of the predicted class only
+322,i feel stressed but i love the feeling of the calming spirit of my heavenly father and the feeling to keep working,sadness,anger,0.5136,False,True,False,False,False,False,False,no word of either class
+347,i feel agitated and annoyed more than worried or fearful but these feelings can easily lead to being short tempered with my family and feelings of disharmony,fear,anger,0.8341,False,True,False,False,False,False,False,word of the true class only
+353,i could feel his breath on me and smell the sweet scent of him,joy,love,0.8615,True,False,False,False,False,True,True,word of the predicted class only
+376,i suppose if one was feeling generous one could say i was stressed by the elevator ride,joy,love,0.5061,True,False,False,False,False,False,False,no word of either class
+379,i feel that the suffering is more than i can bear i take refuge in the lord in the blessed sacrament and i speak to him with profound silence,sadness,love,0.6544,False,False,False,True,False,False,False,no word of either class
+408,i feel quite passionate about and that is how old should children be to undergo beauty treatments,joy,love,0.9248,True,False,False,False,False,False,False,word of the predicted class only
+413,i am and always have been a very sincere nice feeling sociable compassionate helpful girl,joy,love,0.6286,True,False,False,False,False,False,False,no word of either class
+415,i loved the feeling i got during an amazing slalom run whether it was in training or in a race,joy,surprise,0.9614,False,False,False,True,False,True,True,word of the predicted class only
+418,i have been sitting at home revising today and all in all feeling quite stressed,anger,sadness,0.7278,False,True,False,False,False,True,False,no word of either class
+426,i feel unprotected a class post count link href http reprogramming in process,sadness,fear,0.9993,False,True,False,False,False,False,False,no word of either class
+456,i always said i felt so blessed to have him and today that feeling is been reassured many times,joy,love,0.6798,True,False,False,False,False,False,False,no word of either class
+460,i have moments where i just feel so overwhelmed that my eyes well up with tears,fear,surprise,0.5262,False,False,True,False,False,True,False,word of the predicted class only
+468,i cant help feeling this way,sadness,joy,0.9614,False,False,False,True,True,False,False,no word of either class
+476,i feel quite helpless in all of this so prayer is the most effective tool i have because i have no answers and there is nothing else i can offer them right now,sadness,fear,0.7873,False,True,False,False,True,False,False,no word of either class
+489,i believe that people should choose the causes they feel passionate about and do what they can and i have no right or desire to push my own charities as more worthy than another,joy,love,0.9512,True,False,False,False,True,False,False,word of the predicted class only
+496,i never feel like im not supporting,joy,love,0.9404,True,False,False,False,True,True,False,word of the predicted class only
+501,when we rearranged furniture in our flat and got stuck in a chair,anger,fear,0.8714,False,True,False,False,False,False,False,no word of either class
+502,i am feeling stressed and more than a bit anxious,anger,sadness,0.5656,False,True,False,False,False,False,True,no word of either class
+514,i feel about as helpless and superfluous as i did when jenn had elaine naturally,fear,sadness,0.5183,False,True,False,False,False,False,False,no word of either class
+520,i feel i should as a gracious gesture apologizing for my latest post about the osp and the rand license terms,love,joy,0.8158,True,False,False,False,False,True,False,no word of either class
+522,i have reported feeling marginalized intimidated and or subjected to threats of retaliation,fear,sadness,0.9857,False,True,False,False,False,False,False,word of the true class only
+531,i feel like i am not accepted here i and bucking this force that is coming from all quarters that tells me that something is wrong with me if i am not married with children,joy,love,0.7236,True,False,False,False,True,False,False,no word of either class
+542,i also feel i have accepted my dark side and am finally realizing what of my dark side is healthy,joy,love,0.6995,True,False,False,False,False,False,False,no word of either class
+546,i feel so blessed to be able to share it with you all,joy,love,0.8865,True,False,False,False,False,False,False,no word of either class
+564,i started feeling a little stressed about leaving on time and making sure we got the getting ready pictures i wanted but everything seemed to workout perfectly,anger,sadness,0.7455,False,True,False,False,False,False,False,no word of either class
+576,i feel accepted and loved by a community of derby girls that i helped to create,joy,love,0.9037,True,False,False,False,False,True,False,no word of either class
+585,i grabbed my dog and hugged her fiercly for the next hour or so until i began to feel a bit like myself again but i havent completly shaken the feeling and have been feeling rather depressed anxious all day,fear,sadness,0.9994,False,True,False,False,False,False,False,word of the true class only
+637,i feel so blessed to be married to him because he loves his stepchildren,joy,love,0.8497,True,False,False,False,False,False,False,no word of either class
+639,i feel more faithful than ever,joy,love,0.891,True,False,False,False,False,True,False,no word of either class
+654,i met my present boyfriend on a boat trip to england we had said that we would call each other when we got back to sweden we were not going to the same town in england as soon as i walked in he called from england as he could not wait till he came home,joy,anger,0.687,False,False,False,True,True,False,False,no word of either class
+660,i was playing a sport in an advanced pe class and many of the people were not advanced,anger,joy,0.9142,False,False,False,True,True,True,False,no word of either class
+671,i feel thats just strange on wotcs behalf,surprise,fear,0.6469,False,False,True,False,False,False,False,word of the true class only
+688,i feel hated in cempaka,sadness,anger,0.8479,False,True,False,False,False,False,False,no word of either class
+694,i wept while jackson slept feeling overwhelmed by the feeling that i don t want to die,fear,surprise,0.8914,False,False,True,False,True,False,False,word of the predicted class only
+711,told by some people the class leader only choose his friends not true,anger,joy,0.5019,False,False,False,True,True,False,False,no word of either class
+729,i couldnt feel more blessed at this time,joy,love,0.7957,True,False,False,False,True,False,False,no word of either class
+756,getting sent on a company expense trip to another state to work for a week at that plan,joy,anger,0.6832,False,False,False,True,False,False,False,no word of either class
+759,i feel very strongly about supporting charities that help children,joy,love,0.9768,True,False,False,False,False,True,False,word of the predicted class only
+765,i feel totally completely accepted and loved while my heavenly abba was pointing out sin in my life,love,joy,0.5167,True,False,False,False,False,False,False,no word of either class
+779,i input class size medium wp image height src http techfeel in wp content uploads google hindi input x,joy,anger,0.3178,False,False,False,True,False,False,False,no word of either class
+789,i did not feel any passionate joy,joy,love,0.9647,True,False,False,False,True,True,False,word of the predicted class only
+815,i am not proud to be british i am not glad to be young and i most certainly do not feel blessed by opportunity,joy,love,0.7699,True,False,False,False,True,False,False,word of the true class only
+816,whenever i put myself in others shoes and try to make the person happy,anger,joy,0.9996,False,False,False,True,False,True,False,no word of either class
+833,i feel my truth is accepted and not judged because well,love,joy,0.5502,True,False,False,False,True,False,False,no word of either class
+845,i did feel rather like a celebrity and widget stood and let herself be admired while she drank orange squash from my cup,joy,love,0.924,True,False,False,False,False,True,False,no word of either class
+863,i feel betrayed and angry and sad at the same time dammit,anger,fear,0.5671,False,True,False,False,False,False,False,no word of either class
+897,ive been soo excited for him to feel and it was amazing,joy,surprise,0.8712,False,False,False,True,False,True,False,word of the predicted class only
+901,i feel so blessed to have friends i can come to,joy,love,0.8646,True,False,False,False,False,False,False,no word of either class
+902,i am feeling very strange but this is also present movement and i am trying this as one of way,fear,surprise,0.5649,False,False,True,False,False,True,False,word of the predicted class only
+917,i feel the need to pimp this since raini my beloved rocky casting director loves it so much,joy,love,0.9395,True,False,False,False,False,True,True,no word of either class
+922,i was lying in bed last night after a day of making experiments from the usual suspects fabric plastic and feeling agitated that my issues with proper presentation had not made any headway over the course of a mere six hours,anger,fear,0.8595,False,True,False,False,True,False,False,no word of either class
+996,i replied feeling strange at giving the orders,surprise,fear,0.6213,False,False,True,False,False,False,False,word of the true class only
+997,i chant the invocation and feel his force supporting me as i teach,joy,love,0.6289,True,False,False,False,False,False,False,word of the predicted class only
+1003,i started walking again yesterday and it feels amazing,joy,surprise,0.8619,False,False,False,True,False,True,False,word of the predicted class only
+1025,im not sure if its just me who feels this way or if its everyone but tortured souls dont make for the best boyfriends,anger,fear,0.9463,False,True,False,False,True,False,False,no word of either class
+1026,i have not conducted a survey but it is quite likely that many of them feel as assaulted by onel s demons and other creators as i would have felt had the walls been covered only with eminent figures patriotic heroes and epic deeds,sadness,fear,0.9968,False,True,False,False,True,False,True,no word of either class
+1037,i always feel so helpless during times of disaster but i feel a little better knowing that even a few dollars can make a difference for someone in need,sadness,fear,0.7443,False,True,False,False,False,False,False,no word of either class
+1048,i wonder if the homeowners would feel weird if i parked to gape at their landscaping,surprise,fear,0.6722,False,False,True,False,False,False,False,word of the true class only
+1070,i feel shame in a strange way,surprise,fear,0.4888,False,False,True,False,False,False,False,word of the true class only
+1087,i feel for all of you who have been supporting me is so extreme there would be no way to put a number value on it,joy,love,0.9137,True,False,False,False,True,False,False,word of the predicted class only
+1146,i feel affirmed gracious sensuous and will have less self doubt when a href http generations,love,joy,0.9126,True,False,False,False,False,True,False,no word of either class
+1150,when i heard the last regulation of the socialist govrenment concerning pensions,sadness,anger,0.9469,False,True,False,False,False,True,False,no word of either class
+1154,i feel that passionate about,joy,love,0.9119,True,False,False,False,False,False,False,word of the predicted class only
+1162,i would always have this song stuck in my head after a bombing or incident and then i would feel a bit weird about it because if you dont really pay attention to the lyrics it sounds like such a happy song not the type youre supposed to hum on difficult days,fear,surprise,0.5348,False,False,True,False,True,True,False,word of the predicted class only
+1184,i feel agitated a lot im straddling articulacy and incoherence,anger,fear,0.5596,False,True,False,False,False,False,False,no word of either class
+1190,i noticed that i was feeling very stressed and anxious and i just couldnt quite put my finger on why,anger,sadness,0.7185,False,True,False,False,True,False,False,no word of either class
+1206,ive come to feel about a supporting character in one of my all time favorite films giant,joy,love,0.9977,True,False,False,False,False,True,False,word of the predicted class only
+1253,i don t feel betrayed coz the backstabber had no grounds for their accusation but i m just amazed at some people s ability to do such things,surprise,sadness,0.9488,False,False,False,True,True,False,False,word of the true class only
+1265,i was lucky enough to feel and squeeze myself to a win in another festive challenge which involved a box full of items that we had to identify by blindly fondling through a hole,joy,love,0.9865,True,False,False,False,False,False,False,no word of either class
+1273,i feel this strange sort of liberation,surprise,fear,0.7693,False,False,True,False,False,False,False,word of the true class only
+1282,im always feeling so agitated overly excited and impatient to those who are close to me,anger,fear,0.8037,False,True,False,False,False,False,False,no word of either class
+1289,at a party i met a girl who drew me to her,anger,fear,0.5791,False,True,False,False,False,False,False,no word of either class
+1314,ive blogged and i feel strange about it,surprise,fear,0.948,False,False,True,False,False,False,False,word of the true class only
+1319,i still do feel left out i do feel like the most hated kid in the asian crew,anger,sadness,0.8898,False,True,False,False,False,True,False,no word of either class
+1322,i started to feel so overwhelmed,fear,surprise,0.6954,False,False,True,False,False,True,False,word of the predicted class only
+1323,i feel slytherin is my house slytherin is for those who are smart enough to know how to get the job done and at any cost,joy,fear,0.6133,False,False,False,True,False,False,False,no word of either class
+1328,i don t really know the oldest one very well and his mothering mother seems to feel that he is not sweet,joy,love,0.9855,True,False,False,False,True,True,False,word of the predicted class only
+1360,i have a family i can feel passionate about and completely comfortable with,joy,love,0.8321,True,False,False,False,False,False,False,word of the predicted class only
+1377,i walked to school he felt the bounce in his step the overjoyed feelings of youth and the thrill of excitement of coming to school and meeting his beloved friends,love,joy,0.9971,True,False,False,False,False,False,False,no word of either class
+1381,i was like should i feel sweet or feel offended,love,anger,0.993,False,False,False,True,False,False,False,words of both classes
+1382,i cannot even begin to express in words the depth of sorrow that i feel having not posted any of my ludicrous rants over the passed days,surprise,sadness,0.9069,False,False,False,True,True,True,False,word of the true class only
+1383,this monday i took a math bs test and flunked for the second time,sadness,anger,0.4181,False,True,False,False,False,False,False,no word of either class
+1417,i don t know about you but i m feeling amp blessed,joy,love,0.7985,True,False,False,False,True,False,False,no word of either class
+1431,i felt a stronger wish to be free from self cherishing through my refuge practice and a return to the feeling of freedom and protection from suffering which i stayed with for the rest of the meditation,sadness,joy,0.7582,False,False,False,True,False,True,False,no word of either class
+1467,i seek out pain to feel tortured just to feel something,fear,anger,0.7039,False,True,False,False,False,True,False,no word of either class
+1469,i already feel he is using us it feels weird because i havent even done anything there yet but i feel it coming like ministry coming at me,fear,surprise,0.5107,False,False,True,False,False,True,False,word of the predicted class only
+1509,i decide that picking the easy route would get me nowhere and i feel like other people want me tortured so i follow the blue path,fear,anger,0.7729,False,True,False,False,True,True,False,no word of either class
+1517,i could have expected in every way and i was feeling a bit overwhelmed at that point how quickly life changed in the past weeks,fear,surprise,0.9716,False,False,True,False,False,True,False,word of the predicted class only
+1533,i actually was in a meeting last week where someone yelled at an older lady because her phone rang i felt terrible for her your boss treats you unfairly or in this case someone makes you feel you are not worth anything is only allowing those who offended to steal your joy,anger,sadness,0.938,False,True,False,False,True,False,False,word of the true class only
+1537,i like the fresh feeling of sweet he gave me,joy,love,0.8715,True,False,False,False,False,False,False,word of the predicted class only
+1545,i feel no shame whatsoever in longing for iron man at my local cineworld,love,sadness,0.6613,False,False,False,True,True,False,False,word of the true class only
+1558,i don t know about you but it makes me feel generous,joy,love,0.8777,True,False,False,False,True,False,False,no word of either class
+1560,i feel helpless to regain a safe feeling,sadness,fear,0.8684,False,True,False,False,False,False,False,no word of either class
+1569,i feel lonely who make me feel special when i feel useless who are always kind and sweet to me,sadness,joy,0.9949,False,False,False,True,False,False,False,no word of either class
+1585,i firmly believe that the only way to go about this craft is to write the book that you feel passionate about and not to worry about finding the book that the mass audience desires,joy,love,0.9808,True,False,False,False,True,True,False,word of the predicted class only
+1589,i feel as though i have merely accepted what has been done and that no matter what time has gone by it will always be with me,joy,love,0.8758,True,False,False,False,True,False,False,no word of either class
+1593,i suppose we all feel a little inhibited when it comes to picking up the phone and calling someone we re not very close to anymore,sadness,fear,0.7778,False,True,False,False,True,False,False,no word of either class
+1607,i felt it had a slight bitterness in the finish that detracted from its oily mouthfeel and sweet entry,joy,love,0.7727,True,False,False,False,False,True,False,word of the predicted class only
+1616,i wont lie this week has been abit of a difficult week for me ive been feeling very stressed and anxious this week plus i think im coming down with the flu but it has definately helped me to appreciate the little things,anger,sadness,0.6898,False,True,False,False,True,False,False,no word of either class
+1627,i feel i can only hope im not alone in these thoughts and im sure to all you fellow exchange students you probably have the same thoughts in mind with at least some of this listed some might say being an exchange student is unlike any other experience,sadness,joy,0.9998,False,False,False,True,True,True,False,no word of either class
+1655,i feel so helpless right now,fear,sadness,0.5246,False,True,False,False,False,False,False,no word of either class
+1679,i feel like that im hated by most of the girls is it becoz im a good dancer,sadness,anger,0.5441,False,True,False,False,False,False,False,no word of either class
+1708,i just tell people i feel like one sweet southern mess right now,joy,love,0.9401,True,False,False,False,False,True,False,word of the predicted class only
+1729,i felt like id developed feelings for this guy thus explaining why id even follow this guy like a faithful puppy dog and he never knew,joy,love,0.9735,True,False,False,False,True,True,False,no word of either class
+1736,i was stressed about my job search and apartment hunting and i was just feeling overwhelmed with everything that was going on,fear,surprise,0.9801,False,False,True,False,False,True,False,word of the predicted class only
+1748,i didnt want to be spending my days working in a job that i didnt enjoy or to come home feeling stressed and tired and not be able to give my daughter the attention she deserved,anger,sadness,0.793,False,True,False,False,True,True,False,no word of either class
+1752,i feel like everything that i hope to become a piller in my life i cling to i despise myself for clinging to something like a hopeless fucking baby,sadness,anger,0.9902,False,True,False,False,False,False,False,no word of either class
+1764,i don t know how else to describe it except to say that i had the same feeling about three weeks before my beloved grandmother passed away,joy,love,0.9672,True,False,False,False,True,False,False,no word of either class
+1772,i have this grave feeling it will not be back until tomorrow and strangely enough i have accepted it,joy,love,0.8938,True,False,False,False,True,True,False,no word of either class
+1780,when i learnt that my best friend had failed the exams,anger,sadness,0.8756,False,True,False,False,False,False,False,no word of either class
+1796,i don t care if any of you read this but this is just what i feel when i m around you guys i feel hated,sadness,anger,0.8067,False,True,False,False,True,False,False,no word of either class
+1816,i also know that if today i refuse to hate jews or anybody else it is because i know how it feels to be hated,sadness,anger,0.8298,False,True,False,False,False,False,False,no word of either class
+1826,i don t always feel like i have amazing style and most days i choose comfort over anything else but there is one thing that i feel makes all the difference in how i feel about myself and that is makeup,joy,surprise,0.8939,False,False,False,True,True,False,True,word of the predicted class only
+1837,i hate these feelings in my heart i hate that work stressed me out i hate that cornelius wont let me get my way im frustrated lord,sadness,anger,0.989,False,True,False,False,True,False,False,no word of either class
+1842,i feel so amazing musicjuzz,joy,surprise,0.9051,False,False,False,True,False,True,False,word of the predicted class only
+1876,i need a break or im feeling stressed out,anger,sadness,0.8553,False,True,False,False,False,False,False,no word of either class
+1887,i feel like some of you have pains and you cannot imagine becoming passionate about the group or the idea that is causing pain,joy,love,0.9244,True,False,False,False,True,False,True,word of the predicted class only
+1894,i am not sure how i feel i think because i felt like i already knew i have already sort of accepted it,joy,love,0.7942,True,False,False,False,True,False,False,no word of either class
+1911,im ok with that it feels a little weird,surprise,fear,0.8499,False,False,True,False,False,False,False,word of the true class only
+1925,i am still feeling a tad strange in those pearly whites,surprise,fear,0.5968,False,False,True,False,False,False,False,word of the true class only
+1928,i feel inside cause life is like a game sometimes but then you came around me the walls just disappeared nothing to surround me and keep me from my fears im unprotected see how ive opened up youve made me trust,fear,sadness,0.9972,False,True,False,False,True,True,False,no word of either class
+1943,i didn t mean to get angry with you bommie i just can t control my feelings hellip i just hated myself why i am like this the dara who can t get over with that b,sadness,anger,0.8843,False,True,False,False,True,True,False,no word of either class
+1956,i was gaining weight getting a lot stronger and feeling amazing,joy,surprise,0.7751,False,False,False,True,False,True,False,word of the predicted class only
+1959,i check you when you re sleeping feel your nose and toes to be sure you aren t too hot or cold,joy,love,0.6885,True,False,False,False,True,True,False,word of the predicted class only
+1992,i feel tortured delilahlwl am considering i had one the other day about one of my closest friends raping and killing chicks,anger,fear,0.6905,False,True,False,False,False,False,False,no word of either class

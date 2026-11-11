@@ -1,0 +1,13 @@
+run,drive_path,size_mb,best_epoch,train_time_s,wandb_id
+tfidf_lr_min_nocw,DL/A2/checkpoints/tfidf_lr_min_nocw.joblib,2.23,,20.72,7wlsxtx8
+tfidf_lr_min_cw,DL/A2/checkpoints/tfidf_lr_min_cw.joblib,2.23,,13.94,pwfi016q
+distil_full_min,DL/A2/checkpoints/distil_full_min,256.12,3,289.02,lnuy747a
+distil_full_min_s43,DL/A2/checkpoints/distil_full_min_s43,256.12,3,271.18,psflj88c
+distil_full_min_s44,DL/A2/checkpoints/distil_full_min_s44,256.12,3,270.48,llw3bte9
+bert_full_min,DL/A2/checkpoints/bert_full_min,418.36,2,524.75,ulss79nz
+bert_full_min_s43,DL/A2/checkpoints/bert_full_min_s43,418.36,3,524.1,pil00scg
+bert_full_min_s44,DL/A2/checkpoints/bert_full_min_s44,418.36,3,525.1,noxjos1c
+distil_freeze_min,DL/A2/checkpoints/distil_freeze_min,256.12,3,81.66,7rugvdvg
+distil_freeze_min_s43,DL/A2/checkpoints/distil_freeze_min_s43,256.12,2,81.6,83s806pr
+distil_freeze_min_s44,DL/A2/checkpoints/distil_freeze_min_s44,256.12,3,81.0,k1uomhhg
+tfidf_lr_aggr_cw,DL/A2/checkpoints/tfidf_lr_aggr_cw.joblib,1.17,,5.33,3ojjzuey
