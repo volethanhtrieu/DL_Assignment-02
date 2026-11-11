@@ -895,7 +895,7 @@
         }
         .demo-hf-iframe {
             width: 100%;
-            min-height: 680px;
+            min-height: 920px;   /* whole demo (input + both result cards) without an inner scroll bar */
             border: 1px solid #d6e2ee;
             border-radius: 12px;
             background: #fff;
@@ -935,7 +935,7 @@
         @media (max-width: 680px) {
             .demo-top-row { grid-template-columns: 1fr; }
             .demo-input-row { flex-direction: column; }
-            .demo-hf-iframe { min-height: 520px; }
+            .demo-hf-iframe { min-height: 1250px; }   /* result cards stack on phones */
             .eda-split { grid-template-columns: 1fr; }
             .eda-split figure[data-map="eda-1"] img { height: 260px; }
             .preprocess-grid { grid-template-columns: 1fr; }
@@ -1178,10 +1178,11 @@
             <h1>Assignment 02 — Emotion Text Classification</h1>
             <p>
                 We classify short English texts from <em>dair-ai/emotion</em> into six emotions and compare a TF-IDF +
-                Logistic Regression baseline with two fine-tuned transformers, DistilBERT and BERT. On the validation set
-                (M2, preliminary), DistilBERT reaches Macro-F1 0.9155 ± 0.0020 over three seeds against 0.8489 for the
-                baseline; BERT reaches 0.9163 ± 0.0032, no better than DistilBERT, at about twice the cost.
-                Test results follow after model selection.
+                Logistic Regression baseline with two fine-tuned transformers, DistilBERT and BERT, and with a frozen-encoder
+                DistilBERT (main controlled experiment). Every choice was made on validation; the test set was used once.
+                On test, the selected model (DistilBERT full fine-tune, seed 42) reaches <strong>Macro-F1 0.8902 and accuracy
+                0.9270</strong> (three seeds: 0.8861 ± 0.0038) against 0.8548 for the best baseline. BERT ties with DistilBERT
+                (0.8878 ± 0.0004) at about twice the cost, and a frozen encoder fails (0.4210 ± 0.0020).
             </p>
             <div class="chip-row">
                 <a href="https://huggingface.co/datasets/dair-ai/emotion" class="chip" target="_blank" rel="noopener">Dataset: dair-ai/emotion (split)</a>
@@ -1216,8 +1217,10 @@
             <a href="#ablation">Controlled Experiments</a>
             <a href="#errors">Error Analysis</a>
             <a href="#conclusion">Conclusion</a>
-            <a href="#resources">Resources</a>
+            <a href="#resources">Code & Checkpoints</a>
+            <a href="#video">Presentation Video</a>
             <a href="#ai-usage">AI Usage</a>
+            <a href="#live-demo">Live Demo</a>
         </nav>
 
         <!-- ═══════════════ 01 PROBLEM ═══════════════ -->
@@ -1238,7 +1241,7 @@
                 <div class="kpi"><div class="label">Task</div><div class="value">Multiclass text classification</div></div>
                 <div class="kpi"><div class="label">Classes</div><div class="value">6 emotions</div></div>
                 <div class="kpi"><div class="label">Metrics</div><div class="value">Macro-F1 (selection) + Accuracy</div></div>
-                <div class="kpi"><div class="label">Runs compared (M2)</div><div class="value">8 runs · 3 models (validation)</div></div>
+                <div class="kpi"><div class="label">Runs compared</div><div class="value">12 runs · validation + test</div></div>
             </div>
         </section>
 
@@ -1424,8 +1427,9 @@
                 A lexical baseline shows how far word and bigram counts go on this data; the EDA (section 02) suggested labels
                 follow emotion keywords, so a strong baseline was expected. DistilBERT is the pretrained model from the
                 approved plan: it reads the whole text in context (word order, negation). BERT is the larger encoder it was
-                distilled from. All three use the same filtered splits and the same minimal text (<code>text_min</code>:
-                NFC, lowercase, whitespace).
+                distilled from. All models use the same filtered splits. The transformers read the minimal text
+                (<code>text_min</code>: NFC, lowercase, whitespace); the selected baseline reads the aggressive text
+                (stopwords removed, negations kept), chosen on validation in experiment 3 (section 07).
             </p>
             <figure class="card-figure" style="margin-top: 0.75rem;">
                 <div style="overflow-x: auto;">
@@ -1441,7 +1445,7 @@
                         <rect x="180" y="70" width="140" height="50" rx="10" fill="var(--panel)" stroke="var(--line)"></rect>
                         <text x="250" y="92">Filtering rules 1–4</text><text x="250" y="110" font-size="11" fill="var(--muted)">15,923 / 1,993 / 2,000</text>
                         <rect x="350" y="70" width="120" height="50" rx="10" fill="var(--panel)" stroke="var(--line)"></rect>
-                        <text x="410" y="92">text_min</text><text x="410" y="110" font-size="11" fill="var(--muted)">NFC · lower · spaces</text>
+                        <text x="410" y="92">Text cleaning</text><text x="410" y="110" font-size="11" fill="var(--muted)">text_min · text_aggr</text>
                         <rect x="510" y="15" width="200" height="50" rx="10" fill="var(--panel)" stroke="var(--accent)"></rect>
                         <text x="610" y="37">TF-IDF (1,2) → LogReg</text><text x="610" y="55" font-size="11" fill="var(--muted)">CPU · balanced weights</text>
                         <rect x="510" y="125" width="200" height="50" rx="10" fill="var(--panel)" stroke="var(--accent)"></rect>
@@ -1488,9 +1492,9 @@
                     <table class="info-table">
                         <thead><tr><th></th><th>TF-IDF + LR</th><th>DistilBERT</th><th>BERT</th></tr></thead>
                         <tbody>
-                            <tr><td>Input</td><td>Sparse TF-IDF vector (uni + bigrams)</td><td>WordPiece tokens, MAX_LEN 128</td><td>Same WordPiece vocabulary and MAX_LEN as DistilBERT</td></tr>
+                            <tr><td>Input</td><td>Sparse TF-IDF vector (uni + bigrams) of the minimal or aggressive text</td><td>WordPiece tokens, MAX_LEN 128</td><td>Same WordPiece vocabulary and MAX_LEN as DistilBERT</td></tr>
                             <tr><td>Loss</td><td>Cross-entropy, balanced class weights</td><td>Weighted cross-entropy</td><td>Weighted cross-entropy</td></tr>
-                            <tr><td>Parameters</td><td>196,662</td><td>66,958,086</td><td>109,486,854</td></tr>
+                            <tr><td>Parameters</td><td>196,662 (minimal text) · 102,426 (aggressive text, selected)</td><td>66,958,086</td><td>109,486,854</td></tr>
                             <tr><td>Self-implemented</td><td>Filtering, features pipeline, class-weight test (scikit-learn models)</td><td colspan="2">Data loader, training loop, weighted loss, two learning rates, checkpoint selection (Hugging Face pretrained weights)</td></tr>
                             <tr><td>Libraries</td><td>scikit-learn</td><td>PyTorch, Hugging Face Transformers</td><td>PyTorch, Hugging Face Transformers</td></tr>
                             <tr><td>Hardware</td><td>Colab CPU, Intel Xeon @ 2.00GHz (2 vCPU)</td><td>Colab Tesla T4 (14.6 GB)</td><td>Colab Tesla T4 (14.6 GB)</td></tr>
@@ -1517,9 +1521,9 @@
                             <tr><th>Scheduler / warmup</th><td>Linear warmup over the first 10% of steps (298), then linear decay to 0</td></tr>
                             <tr><th>Regularization / early stopping</th><td>Weight decay 0.01, gradient clipping at 1.0, the models' default dropout; no early stopping, the best epoch is kept</td></tr>
                             <tr><th>Checkpoint criterion</th><td>Best validation Macro-F1</td></tr>
-                            <tr><th>Seed</th><td>42 for every run; DistilBERT and BERT full fine-tune repeated with seeds 43 and 44 (mean ± std over three seeds)</td></tr>
-                            <tr><th>Hardware / software</th><td>Colab Tesla T4 14.6 GB, Intel Xeon 2 vCPU, 12.7 GB RAM; Python 3.13.16, PyTorch 2.11.0+cu130, Transformers 5.20.2, scikit-learn 1.6.1</td></tr>
-                            <tr><th>Hyperparameter selection</th><td>Not tuned: standard BERT fine-tuning values, identical for both transformers. Class weights were chosen on validation with the baseline (Macro-F1 0.8489 on vs 0.7527 off)</td></tr>
+                            <tr><th>Seed</th><td>42 for every run; every transformer setup (DistilBERT full, BERT full, DistilBERT frozen) repeated with seeds 43 and 44 (mean ± std over three seeds)</td></tr>
+                            <tr><th>Hardware / software</th><td>Colab Tesla T4 14.6 GB, Intel Xeon 2 vCPU, 12.7 GB RAM; Python 3.13.16, PyTorch 2.14.1+cu130 (CUDA 13.0), Transformers 5.22.1, scikit-learn 1.6.1 (final run, 8 Nov 2026)</td></tr>
+                            <tr><th>Hyperparameter selection</th><td>Not tuned: standard BERT fine-tuning values, identical for both transformers. Class weights (Macro-F1 0.8489 on vs 0.7527 off) and the baseline text variant were chosen on validation</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1531,11 +1535,12 @@
                 and 2 for BERT (0.9200, then 0.9154 at epoch 3). Over all six transformer runs, validation loss rose again at
                 epoch 3 in three runs (DistilBERT seeds 43 and 44, BERT seed 44) while Macro-F1 still improved, and the
                 selected epoch is the last one in five of six runs. Three epochs therefore look close to the useful limit,
-                with no strong overfitting; longer training was not tested.
+                with no strong overfitting; longer training was not tested. The frozen-encoder runs (orange) underfit:
+                train and validation loss are equal (1.425 at epoch 3) and still falling when the learning rate reaches zero.
             </p>
             <figure class="card-figure metric-plot wide-plot" style="margin-top: 0.75rem;">
-                <img src="site/assets/images/a2_curves.png" alt="Training curves: loss, validation Macro-F1 and learning rate">
-                <figcaption>Left: train and validation loss. Middle: validation Macro-F1, circled = saved epoch, dotted = baseline. Right: learning rate per step for the head and the encoder; dots = head LR logged at the end of each epoch. Solid = DistilBERT, dash-dot = BERT.</figcaption>
+                <img src="site/assets/images/a2_curves_final.png" alt="Training curves: loss, validation Macro-F1 and learning rate">
+                <figcaption>Left: train and validation loss. Middle: validation Macro-F1, circled = saved epoch, dotted = baseline. Right: learning rate per step for the head and the encoder; dots = head LR logged at the end of each epoch. Colour = run: blue = DistilBERT, green = BERT, orange = DistilBERT with a frozen encoder; in the loss panel solid = train, dashed = validation.</figcaption>
             </figure>
         </section>
 
@@ -1546,14 +1551,22 @@
                 <h2>Results and comparison</h2>
             </div>
             <p>
-                <strong>Preliminary (M2): validation set only.</strong> The test set is evaluated once, after model selection,
-                in the final milestone. Filter by model or setup and sort by any column. Green = best, light = second best in
-                each column. Seeds 43 and 44 repeat the full fine-tunes with a different seed only.
+                <strong>Final results.</strong> Every choice (class weights, text variant, checkpoint epoch, final model) was
+                made on validation with rules fixed in advance; the 12 runs were then evaluated once on the 2,000 test texts.
+                Switch between test and validation with the tabs, filter by model or setup and sort by any column. Green = best,
+                light = second best in each column. Seeds 43 and 44 repeat a setup with a different seed only.
             </p>
+            <div class="callout">
+                <strong>Model selection (validation only, before any test result).</strong> Baseline: the better text variant,
+                TF-IDF + LR on the aggressive text (0.8758 vs 0.8489). Main model: DistilBERT vs BERT by mean validation
+                Macro-F1 over three seeds; the gap +0.0008 is smaller than the larger seed std 0.0032, so it is a tie and the
+                smaller model is kept: <strong>DistilBERT full fine-tune, seed-42 run</strong> (not the best seed, to avoid one
+                more selection on validation). The frozen encoder is excluded by experiment 1.
+            </div>
 
             <div class="training-tabs" aria-label="Split filter">
-                <button class="filter-btn" data-filter="test">Test (final)</button>
-                <button class="filter-btn active" data-filter="val">Validation</button>
+                <button class="filter-btn active" data-filter="test">Test (final)</button>
+                <button class="filter-btn" data-filter="val">Validation</button>
                 <button class="filter-btn" data-filter="all">All</button>
             </div>
 
@@ -1575,6 +1588,7 @@
                         <option value="trainTime">Train time</option>
                         <option value="inferMs">Inference (ms/sample)</option>
                         <option value="totalParams">Params</option>
+                        <option value="trainableParams">Trainable params</option>
                         <option value="sizeMb">Size (MB)</option>
                     </select>
                 </div>
@@ -1603,6 +1617,7 @@
                                 <th class="cost-col down">Train time (s)</th>
                                 <th class="cost-col down">Inference (ms/sample)</th>
                                 <th class="cost-col down">Params (M)</th>
+                                <th class="cost-col down">Trainable (M)</th>
                                 <th class="cost-col down">Size (MB)</th>
                                 <th>Hardware</th>
                             </tr>
@@ -1619,50 +1634,58 @@
 
             <h3 style="margin-top: 1rem; font-size: 1.02rem;">Comparison and discussion</h3>
             <p>
-                <strong>Transformers vs baseline.</strong> DistilBERT reaches Macro-F1 0.9155 ± 0.0020 (three seeds) against
-                0.8489 for the baseline, +0.067, with accuracy 0.9373 vs 0.8751. It is better on all six classes, most on the
-                two classes where the baseline is weakest: surprise (+0.086) and fear (+0.081). Text by text (seed 42),
-                DistilBERT alone is right on 162 validation texts and the baseline alone on 38 (McNemar p &lt; 0.001). The gain
-                costs about 44× the training time (4.2 min on a T4 GPU vs 5.8 s on CPU), 340× the trainable parameters, 115×
-                the file size, and one to two orders of magnitude slower prediction (1.4 ms vs 0.02–0.07 ms per text; the
-                baseline's CPU timing varied between measurements).
+                <strong>Transformer vs baseline.</strong> On test, DistilBERT (seed 42) reaches Macro-F1 0.8902 and accuracy
+                0.9270 against 0.8548 and 0.8905 for the selected baseline (+0.0354 / +0.0365). It is better on all six
+                classes, most on love (+0.060) and least on anger (+0.022). Text by text, 124 test texts are right only for
+                DistilBERT and 51 only for the baseline (McNemar exact p ≈ 3 × 10<sup>−8</sup>). The gain is largest where
+                one emotion word is not enough: long texts (≥ 35 words, accuracy 0.920 vs 0.806), texts with "but"
+                (0.929 vs 0.854) and negated texts (0.912 vs 0.857); on short texts the two are close (0.943 vs 0.924).
+                The price is about 45× the CPU latency per text (59.6 vs 1.32 ms), 650× the parameters and 219× the file size.
             </p>
             <p>
-                <strong>BERT vs DistilBERT.</strong> BERT reaches 0.9163 ± 0.0032 against 0.9155 ± 0.0020. With the same
-                seed, the difference is +0.0051, −0.0033 and +0.0005 (mean +0.0008), smaller than the seed-to-seed spread of
-                either model; text by text (seed 42) BERT alone is right on 56 texts and DistilBERT alone on 47
-                (McNemar p ≈ 0.43). On this data there is no evidence that BERT is better, while it trains 2.0× and predicts
-                2.2× slower with 1.6× the parameters, so DistilBERT is the better trade-off. Caveats: validation only, three
-                seeds per model, one untuned recipe for both.
+                <strong>BERT vs DistilBERT.</strong> BERT reaches 0.8878 ± 0.0004 on test against 0.8861 ± 0.0038
+                (validation 0.9163 ± 0.0032 vs 0.9155 ± 0.0020). The per-seed differences change sign on both splits, and on
+                test 62 texts are right only for BERT and 60 only for DistilBERT (McNemar p ≈ 0.93): the two models are tied.
+                BERT costs 1.64× the parameters, 1.89× the training time and 2.00× the CPU latency, so DistilBERT is kept.
+            </p>
+            <p>
+                <strong>Validation → test.</strong> The strong models lose 0.01–0.03 Macro-F1 from validation to test,
+                mostly on surprise (DistilBERT −0.082; only 66 test texts, so one error moves its F1 by about 0.015) and
+                love (−0.033); sadness and fear barely change. Part of the drop is expected, because the checkpoint epoch
+                and the model were chosen on validation. The ranking of all setups is the same on both splits.
             </p>
 
             <div class="grid-2" style="margin-top: 0.75rem;">
                 <div class="compare-table-card">
-                    <div class="title">Validation Macro-F1 over seeds</div>
+                    <div class="title">Macro-F1 over seeds (mean ± std)</div>
                     <div class="table-scroll">
                         <table class="info-table">
-                            <thead><tr><th>Model / setup</th><th>Runs</th><th>Mean</th><th>Std</th><th>Min–max</th></tr></thead>
+                            <thead><tr><th>Model / setup</th><th>Runs</th><th>Validation</th><th>Test</th></tr></thead>
                             <tbody>
-                                <tr><td>BERT, full fine-tune</td><td>3</td><td>0.9163</td><td>0.0032</td><td>0.9145–0.9200</td></tr>
-                                <tr><td>DistilBERT, full fine-tune</td><td>3</td><td>0.9155</td><td>0.0020</td><td>0.9140–0.9178</td></tr>
-                                <tr><td>TF-IDF + LR, class weights on</td><td>1</td><td>0.8489</td><td>–</td><td>–</td></tr>
+                                <tr><td><strong>DistilBERT, full fine-tune</strong></td><td>3</td><td>0.9155 ± 0.0020</td><td><strong>0.8861 ± 0.0038</strong></td></tr>
+                                <tr><td>BERT, full fine-tune</td><td>3</td><td>0.9163 ± 0.0032</td><td>0.8878 ± 0.0004</td></tr>
+                                <tr><td>DistilBERT, frozen encoder</td><td>3</td><td>0.4191 ± 0.0061</td><td>0.4210 ± 0.0020</td></tr>
+                                <tr><td><strong>TF-IDF + LR, aggressive text, weights</strong></td><td>1</td><td>0.8758</td><td><strong>0.8548</strong></td></tr>
+                                <tr><td>TF-IDF + LR, minimal text, weights</td><td>1</td><td>0.8489</td><td>0.8365</td></tr>
+                                <tr><td>TF-IDF + LR, minimal text, no weights</td><td>1</td><td>0.7527</td><td>0.7289</td></tr>
+                                <tr><td>Majority class (always joy)</td><td>–</td><td>0.0868</td><td>0.0860</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
                 <div class="compare-table-card">
-                    <div class="title">Per-class F1 on validation (seed 42)</div>
+                    <div class="title">Per-class F1 on test (seed 42) and validation F1 of the selected model</div>
                     <div class="table-scroll">
                         <table class="info-table">
-                            <thead><tr><th>Class (n)</th><th>TF-IDF + LR</th><th>DistilBERT</th><th>BERT</th></tr></thead>
+                            <thead><tr><th>Class (test n)</th><th>Baseline</th><th>DistilBERT</th><th>BERT</th><th>DistilBERT val</th></tr></thead>
                             <tbody>
-                                <tr><td>sadness (550)</td><td>0.8959</td><td>0.9616</td><td>0.9579</td></tr>
-                                <tr><td>joy (702)</td><td>0.9004</td><td>0.9561</td><td>0.9621</td></tr>
-                                <tr><td>love (176)</td><td>0.8354</td><td>0.8853</td><td>0.9112</td></tr>
-                                <tr><td>anger (274)</td><td>0.8800</td><td>0.9375</td><td>0.9440</td></tr>
-                                <tr><td>fear (211)</td><td>0.8124</td><td>0.8929</td><td>0.8905</td></tr>
-                                <tr><td>surprise (80)</td><td>0.7692</td><td>0.8554</td><td>0.8541</td></tr>
-                                <tr><td>Macro avg</td><td>0.8489</td><td>0.9148</td><td>0.9200</td></tr>
+                                <tr><td>sadness (581)</td><td>0.9296</td><td>0.9612</td><td>0.9643</td><td>0.9616</td></tr>
+                                <tr><td>joy (695)</td><td>0.9110</td><td>0.9504</td><td>0.9513</td><td>0.9561</td></tr>
+                                <tr><td>love (159)</td><td>0.7925</td><td>0.8523</td><td>0.8452</td><td>0.8853</td></tr>
+                                <tr><td>anger (275)</td><td>0.8917</td><td>0.9134</td><td>0.9202</td><td>0.9375</td></tr>
+                                <tr><td>fear (224)</td><td>0.8631</td><td>0.8904</td><td>0.8825</td><td>0.8929</td></tr>
+                                <tr><td>surprise (66)</td><td>0.7407</td><td>0.7737</td><td>0.7654</td><td>0.8554</td></tr>
+                                <tr><td>Macro-F1</td><td>0.8548</td><td>0.8902</td><td>0.8881</td><td>0.9148</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1671,70 +1694,170 @@
 
             <figure class="card-figure metric-plot wide-plot" style="margin-top: 0.75rem;">
                 <img src="site/assets/images/a2_top_features_tfidf.png" alt="Top TF-IDF features per class">
-                <figcaption>Highest-weight TF-IDF features per class (baseline): almost all are single emotion adjectives, consistent with a lexical model already reaching 0.85 Macro-F1.</figcaption>
+                <figcaption>Highest-weight TF-IDF features per class (baseline with class weights, minimal text): almost all are single emotion adjectives, consistent with a lexical model already reaching 0.85 Macro-F1.</figcaption>
             </figure>
 
-            <h3 style="margin-top: 1rem; font-size: 1.02rem;">Confusion matrices (validation, seed 42)</h3>
+            <h3 style="margin-top: 1rem; font-size: 1.02rem;">Confusion matrices (seed 42)</h3>
+            <div class="training-tabs" style="margin-top: 0.6rem;" aria-label="Confusion matrix split">
+                <button class="tab-btn active" data-tab="cm-test">Test (final)</button>
+                <button class="tab-btn" data-tab="cm-val">Validation</button>
+            </div>
+            <div class="tab-panel active" data-panel="cm-test">
             <div class="confusion-gallery" style="margin-top: 0.75rem;">
                 <figure class="card-figure metric-plot">
-                    <img src="site/assets/images/a2_cm_val_tfidf_lr_min_cw.png" alt="Validation confusion matrix TF-IDF + LR">
-                    <figcaption>TF-IDF + LR (class weights on)</figcaption>
+                    <img src="site/assets/images/a2_cm_test_distil_full_min.png" alt="Test confusion matrix DistilBERT full fine-tune">
+                    <figcaption>DistilBERT, full fine-tune (selected) · 0.8902</figcaption>
                 </figure>
                 <figure class="card-figure metric-plot">
-                    <img src="site/assets/images/a2_cm_val_distil_full_min.png" alt="Validation confusion matrix DistilBERT">
-                    <figcaption>DistilBERT, full fine-tune</figcaption>
+                    <img src="site/assets/images/a2_cm_test_tfidf_lr_aggr_cw.png" alt="Test confusion matrix TF-IDF + LR aggressive text">
+                    <figcaption>TF-IDF + LR, aggressive text (selected baseline) · 0.8548</figcaption>
+                </figure>
+                <figure class="card-figure metric-plot">
+                    <img src="site/assets/images/a2_cm_test_bert_full_min.png" alt="Test confusion matrix BERT">
+                    <figcaption>BERT, full fine-tune · 0.8881</figcaption>
+                </figure>
+                <figure class="card-figure metric-plot">
+                    <img src="site/assets/images/a2_cm_test_distil_freeze_min.png" alt="Test confusion matrix DistilBERT frozen encoder">
+                    <figcaption>DistilBERT, frozen encoder · 0.4199</figcaption>
+                </figure>
+            </div>
+            <p style="margin-top: 0.6rem;">Colour = share of the true class (the diagonal is recall); numbers = counts out of 2,000 test texts. The errors are read in section 08.</p>
+            </div>
+            <div class="tab-panel" data-panel="cm-val">
+            <div class="confusion-gallery" style="margin-top: 0.75rem;">
+                <figure class="card-figure metric-plot">
+                    <img src="site/assets/images/a2_cm_val_distil_full_min.png" alt="Validation confusion matrix DistilBERT full fine-tune">
+                    <figcaption>DistilBERT, full fine-tune (selected) · 0.9148</figcaption>
+                </figure>
+                <figure class="card-figure metric-plot">
+                    <img src="site/assets/images/a2_cm_val_tfidf_lr_aggr_cw.png" alt="Validation confusion matrix TF-IDF + LR aggressive text">
+                    <figcaption>TF-IDF + LR, aggressive text (selected baseline) · 0.8758</figcaption>
                 </figure>
                 <figure class="card-figure metric-plot">
                     <img src="site/assets/images/a2_cm_val_bert_full_min.png" alt="Validation confusion matrix BERT">
-                    <figcaption>BERT, full fine-tune</figcaption>
+                    <figcaption>BERT, full fine-tune · 0.9200</figcaption>
+                </figure>
+                <figure class="card-figure metric-plot">
+                    <img src="site/assets/images/a2_cm_val_distil_freeze_min.png" alt="Validation confusion matrix DistilBERT frozen encoder">
+                    <figcaption>DistilBERT, frozen encoder · 0.4186</figcaption>
                 </figure>
             </div>
-            <p style="margin-top: 0.6rem;">Colour = share of the true class (the diagonal is recall); numbers = counts. Test-set matrices follow in the final milestone.</p>
+            <p style="margin-top: 0.6rem;">Same layout on the 1,993 validation texts, the split used for every choice. Numbers after each name = validation Macro-F1.</p>
+            </div>
+
+            <h3 style="margin-top: 1rem; font-size: 1.02rem;">Compute cost</h3>
+            <p>
+                Inference was timed with one warm-up and five repeats, keeping the median. "Batched" times the whole
+                validation set (baseline on CPU, transformers on the T4 in batches of 16, tokenisation included). "One text"
+                times 100 validation texts one at a time; the CPU column is the only like-for-like comparison of all models
+                (same CPU, one PyTorch thread). Train time is the mean ± std over seeds.
+            </p>
+            <div class="compare-table-card" style="margin-top: 0.6rem;">
+                <div class="title">Cost of the main runs</div>
+                <div class="table-scroll">
+                    <table class="ranking-table" aria-label="Compute cost">
+                        <thead>
+                            <tr><th class="model-col">Model</th><th class="score-col">Trainable params</th><th class="score-col">Size (MB)</th><th class="score-col">Train time (s)</th><th class="score-col">Batched (ms/text)</th><th class="score-col">One text, CPU (ms)</th><th class="score-col">One text, GPU (ms)</th><th class="score-col">Test Macro-F1 (mean)</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="model-col">TF-IDF + LR, aggressive text</td><td class="score-col">102,426</td><td class="score-col">1.17</td><td class="score-col">5.3 (CPU)</td><td class="score-col">0.0148 (CPU)</td><td class="score-col">1.32</td><td class="score-col">–</td><td class="score-col">0.8548</td></tr>
+                            <tr><td class="model-col"><strong>DistilBERT, full fine-tune</strong></td><td class="score-col">66,958,086</td><td class="score-col">256.12</td><td class="score-col">276.9 ± 10.5</td><td class="score-col">1.63 (T4)</td><td class="score-col">59.64</td><td class="score-col">5.92</td><td class="score-col">0.8861</td></tr>
+                            <tr><td class="model-col">DistilBERT, frozen encoder</td><td class="score-col">595,206</td><td class="score-col">256.12</td><td class="score-col">81.4 ± 0.4</td><td class="score-col">1.59 (T4)</td><td class="score-col">60.90</td><td class="score-col">4.71</td><td class="score-col">0.4210</td></tr>
+                            <tr><td class="model-col">BERT, full fine-tune</td><td class="score-col">109,486,854</td><td class="score-col">418.36</td><td class="score-col">524.7 ± 0.5</td><td class="score-col">3.16 (T4)</td><td class="score-col">119.19</td><td class="score-col">8.79</td><td class="score-col">0.8878</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p style="margin-top: 0.6rem;">
+                BERT / DistilBERT: 1.64× the parameters, 1.89× the training time, 2.00× the CPU latency for +0.0016 test
+                Macro-F1, inside the seed spread. The baseline is about 45× faster than DistilBERT on the same CPU and 219×
+                smaller, for −0.031 mean test Macro-F1. Freezing the encoder saves training time (×0.29) but not inference
+                time, since the forward pass is the same. GPU memory was not measured, because several models shared the GPU
+                during the run.
+            </p>
+            <figure class="card-figure metric-plot wide-plot" style="margin-top: 0.75rem;">
+                <img src="site/assets/images/a2_cost_vs_f1.png" alt="Test Macro-F1 against CPU latency and train time">
+                <figcaption>Cost against quality (x on a log scale; error bars = std over seeds; dotted line = majority-class floor 0.0860). Left: one text at a time on the same CPU. Right: mean train time (baseline on CPU, transformers on the T4). DistilBERT and BERT sit at the same height, BERT twice as far to the right.</figcaption>
+            </figure>
         </section>
 
-        <!-- ═══════════════ 07 CONTROLLED EXPERIMENT ═══════════════ -->
+        <!-- ═══════════════ 07 CONTROLLED EXPERIMENTS ═══════════════ -->
         <section class="section-card reveal" id="ablation">
             <div class="section-head">
                 <span class="idx">07</span>
                 <h2>Controlled experiments</h2>
             </div>
             <p>
-                Two controlled experiments, each changing one factor while everything else stays fixed (data, filtered splits,
-                <code>text_min</code>, MAX_LEN, batch order, learning rates, epochs, warmup, class weights, seeds 42/43/44).
-                Results are compared by the mean over three seeds against the seed-to-seed spread, never by one run.
+                Four comparisons, each changing one factor. Every decision was made on validation with a rule written down
+                before the runs; the test set only checks whether the conclusion holds. Transformer comparisons use the mean
+                over seeds 42/43/44 against the seed-to-seed spread, never one run.
             </p>
+            <div class="compare-table-card" style="margin-top: 0.75rem;">
+                <div class="title">Results: A − B in Macro-F1 ("A higher" counts seeds or runs)</div>
+                <div class="table-scroll">
+                    <table class="ranking-table" aria-label="Experiment results">
+                        <thead>
+                            <tr><th class="model-col">Experiment (A − B)</th><th class="score-col">Val mean</th><th class="score-col">Val: A higher</th><th class="score-col">Test mean</th><th class="score-col">Test: A higher</th><th class="model-col">Decision</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="model-col">1 (main). Full − frozen encoder (DistilBERT)</td><td class="score-col">+0.4965</td><td class="score-col">3 of 3</td><td class="score-col">+0.4651</td><td class="score-col">3 of 3</td><td class="model-col">Full fine-tune; frozen excluded</td></tr>
+                            <tr><td class="model-col">2. BERT − DistilBERT (full)</td><td class="score-col">+0.0008</td><td class="score-col">2 of 3</td><td class="score-col">+0.0016</td><td class="score-col">2 of 3</td><td class="model-col">Tie → smaller model (DistilBERT)</td></tr>
+                            <tr><td class="model-col">3. Stopwords removed − kept (baseline)</td><td class="score-col">+0.0269</td><td class="score-col">1 of 1</td><td class="score-col">+0.0183</td><td class="score-col">1 of 1</td><td class="model-col">Aggressive text for the baseline</td></tr>
+                            <tr><td class="model-col">4. Class weights on − off (baseline)</td><td class="score-col">+0.0961</td><td class="score-col">1 of 1</td><td class="score-col">+0.1076</td><td class="score-col">1 of 1</td><td class="model-col">Weights on for every model</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-            <h3 style="margin-top: 1rem; font-size: 1.02rem;">Experiment 1 (main): DistilBERT frozen encoder vs full fine-tune — planned for the final milestone</h3>
+            <h3 style="margin-top: 1rem; font-size: 1.02rem;">Experiment 1 (main): DistilBERT frozen encoder vs full fine-tune</h3>
             <div class="design-grid">
-                <div class="design-item"><div class="label">Hypothesis</div>Training only the head on a frozen encoder gives lower Macro-F1 than full fine-tuning: the pretrained [CLS] vector was not trained to summarise emotion, and the head has only 595,206 parameters.</div>
-                <div class="design-item"><div class="label">Changed factor</div>Encoder frozen (0.89% of parameters trained) vs fully fine-tuned (66,958,086)</div>
-                <div class="design-item"><div class="label">Fixed factors</div>Model, data, text, MAX_LEN, batch order, head learning rate, schedule, 3 epochs, class weights, seeds</div>
-                <div class="design-item"><div class="label">Metrics</div>Validation Macro-F1 and Accuracy (mean ± std over 3 seeds), training time</div>
-                <div class="design-item"><div class="label">Decision criterion</div>Agreed by the group before the frozen runs start (allowed Macro-F1 loss for the saved training time)</div>
+                <div class="design-item"><div class="label">Hypothesis</div>The pretrained [CLS] features are not tuned to emotions, so training only the head gives clearly lower Macro-F1, but trains faster.</div>
+                <div class="design-item"><div class="label">Changed factor</div>Encoder frozen (595,206 trainable parameters, 0.89%) vs fully fine-tuned (66,958,086)</div>
+                <div class="design-item"><div class="label">Fixed factors</div>Model, data, text, token ids, batch order per seed, head learning rate, schedule, 3 epochs, class weights, seeds</div>
+                <div class="design-item"><div class="label">Metrics</div>Validation Macro-F1 mean ± std over 3 seeds; accuracy, per-class F1; train and inference time</div>
+                <div class="design-item"><div class="label">Decision criterion (set before the runs)</div>(1) Real gap if full is higher on all 3 seeds and the mean gap &gt; 2 × the larger seed std. (2) Frozen is "good enough" if its mean drop ≤ 0.02.</div>
             </div>
             <div class="callout">
-                <strong>Status:</strong> full fine-tune runs done (0.9155 ± 0.0020); frozen-encoder runs follow in the final milestone.
+                <strong>Result:</strong> frozen 0.4191 ± 0.0061 vs full 0.9155 ± 0.0020 on validation (test 0.4210 ± 0.0020 vs
+                0.8861 ± 0.0038). (1) holds: full is higher on every seed and the gap (0.4965) is far above 2 × 0.0061.
+                (2) fails: the frozen model loses 0.50, and is even below the baseline, so it is excluded. The hypothesis is
+                supported. The frozen runs underfit (train = val loss 1.425, still falling when the LR reaches 0), and their
+                errors spread over all classes (fear predicted 409 times for 211 true fear texts on validation). They train in
+                29% of the time but are not faster at inference. <strong>Limit:</strong> the head kept the LR and the 3 epochs
+                of the full recipe, so the result holds for this recipe only.
             </div>
 
             <h3 style="margin-top: 1rem; font-size: 1.02rem;">Experiment 2: BERT vs DistilBERT (both full fine-tune)</h3>
             <div class="design-grid">
-                <div class="design-item"><div class="label">Question</div>Does a larger pretrained encoder (12 vs 6 layers, 1.6× the parameters) improve Macro-F1 enough to justify its cost?</div>
+                <div class="design-item"><div class="label">Hypothesis</div>The deeper model (12 vs 6 layers, 1.6× the parameters) may give a small gain at about twice the cost; the question is whether the gain exceeds seed noise.</div>
                 <div class="design-item"><div class="label">Changed factor</div>Pretrained model: bert-base-uncased vs distilbert-base-uncased</div>
-                <div class="design-item"><div class="label">Fixed factors</div>Identical token ids, data, text, recipe and seeds; no tuning for either model</div>
-                <div class="design-item"><div class="label">Metrics</div>Validation Macro-F1 and Accuracy (mean ± std, paired by seed), train time, ms per text</div>
-                <div class="design-item"><div class="label">Decision criterion</div>A difference counts only if it is larger than the seed-to-seed spread and has the same sign for every seed</div>
+                <div class="design-item"><div class="label">Fixed factors</div>Identical token ids, data, text, recipe, batch order and seeds; no tuning for either model</div>
+                <div class="design-item"><div class="label">Metrics</div>Validation Macro-F1 (mean ± std, paired by seed); train time, latency</div>
+                <div class="design-item"><div class="label">Decision criterion</div>|mean gap| &lt; larger seed std → tie → keep the smaller model</div>
             </div>
             <div class="callout">
-                <strong>Result (validation):</strong> BERT 0.9163 ± 0.0032 vs DistilBERT 0.9155 ± 0.0020; paired differences
-                +0.0051, −0.0033, +0.0005 (mean +0.0008). The criterion is not met, so BERT is not shown to be better, while it
-                costs 2.0× the training time and 2.2× the inference time. Limitation: "the model" bundles depth, BERT's
-                pretrained pooler and distillation, so the experiment says whether BERT differs, not which part would cause it.
+                <strong>Result:</strong> per seed, BERT − DistilBERT is +0.0051, −0.0033, +0.0005 on validation (mean +0.0008
+                &lt; 0.0032) and −0.0021, +0.0023, +0.0047 on test (mean +0.0016 &lt; 0.0038): a tie on both splits, so
+                DistilBERT is kept. The hypothesis of a small gain is not supported at the precision three seeds allow.
+                <strong>Limit:</strong> the factor bundles depth, BERT's pretrained pooler and distillation, so the experiment
+                says whether BERT differs, not why.
             </div>
-            <p style="margin-top: 0.75rem;">
-                <strong>Extra ablation (baseline, validation):</strong> balanced class weights raised Macro-F1 from 0.7527 to
-                0.8489 and surprise recall from 0.40 to 0.81, so they are used by every model. Stopwords removed vs kept for the
-                baseline follows in the final milestone.
-            </p>
+
+            <h3 style="margin-top: 1rem; font-size: 1.02rem;">Experiments 3 and 4 (baseline)</h3>
+            <div class="compare-table-card" style="margin-top: 0.6rem;">
+                <div class="table-scroll">
+                    <table class="info-table">
+                        <thead><tr><th></th><th>3. Stopwords removed vs kept</th><th>4. Class weights on vs off (ablation)</th></tr></thead>
+                        <tbody>
+                            <tr><th>Hypothesis</th><td>The signal sits in emotion adjectives, which both texts keep, so Macro-F1 changes little</td><td>Balanced weights raise recall of the small classes at some cost in precision, so Macro-F1 rises more than accuracy</td></tr>
+                            <tr><th>Changed / fixed</th><td>Text column (minimal → aggressive); TF-IDF settings, C, class weights fixed</td><td>class_weight off → balanced; minimal text, TF-IDF settings, C = 1 fixed</td></tr>
+                            <tr><th>Rule</th><td>Higher val Macro-F1 wins; a tie keeps the minimal text</td><td>Higher val Macro-F1 wins; a tie keeps no weights</td></tr>
+                            <tr><th>Result</th><td>0.8758 vs 0.8489 val (+0.0269), 0.8548 vs 0.8365 test; F1 higher on all six classes with half the n-grams (17,070 vs 32,776); 85 texts right only with aggressive text vs 37 (McNemar p ≈ 2 × 10<sup>−5</sup>). Hypothesis rejected: removing function words puts the negation next to the emotion word (accuracy on negated val texts 0.8462 → 0.8910)</td><td>0.8489 vs 0.7527 val, 0.8365 vs 0.7289 test; accuracy only +0.046 val. Surprise recall 0.40 → 0.81, precision 0.89 → 0.73; F1 up on all six classes. Hypothesis supported; weights used for every later run, transformers included</td></tr>
+                            <tr><th>Limits</th><td>One run per setting; TF-IDF and C untuned; the aggressive text also drops non-alphanumeric characters</td><td>Compared at C = 1.0 only; weights also give more weight to noisy labels of small classes</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
 
         <!-- ═══════════════ 08 ERROR ANALYSIS ═══════════════ -->
@@ -1744,30 +1867,85 @@
                 <h2>Error analysis</h2>
             </div>
             <p>
-                <strong>Planned for the final milestone:</strong> errors on the test set, grouped from
-                <code>errors_&lt;run&gt;.csv</code> with real examples. <strong>Preliminary view</strong> from the validation
-                confusion matrices of the seed-42 runs: counts below are texts of the true class predicted as the other class.
-                Causes are hypotheses to check, not results.
+                The 146 test errors of the selected model (DistilBERT, seed 42) are compared with the baseline (219 errors)
+                and BERT (144 errors) on the same texts, in three steps: where the errors go, which groups they form, and
+                what the texts look like. Causes are hypotheses.
             </p>
+
             <div class="compare-table-card" style="margin-top: 0.75rem;">
-                <div class="title">Most frequent confusions on validation (TF-IDF + LR / DistilBERT / BERT)</div>
+                <div class="title">1. Largest true → predicted confusions on test (ordered by DistilBERT)</div>
                 <div class="table-scroll">
-                    <table class="info-table">
-                        <thead><tr><th>Group</th><th>Description</th><th>Count (val)</th><th>Hypothesised cause</th><th>Improvement idea</th></tr></thead>
+                    <table class="ranking-table" aria-label="Confusion pairs on test">
+                        <thead>
+                            <tr><th class="model-col">True → predicted</th><th class="score-col">DistilBERT</th><th class="score-col">Baseline</th><th class="score-col">BERT</th><th class="score-col">% of the true class (DistilBERT)</th></tr>
+                        </thead>
                         <tbody>
-                            <tr><td>joy → love</td><td>Joy texts predicted as love; the largest error of the baseline and DistilBERT</td><td>38 / 33 / 13 of 702 joy texts; reverse love → joy 6 / 6 / 16</td><td>Overlapping wording of the two emotions; class weights (love ×2.07, joy ×0.50) may push unclear texts to love</td><td>Read the examples; compare with a run without class weights</td></tr>
-                            <tr><td>→ surprise</td><td>Fear and joy texts predicted as surprise</td><td>fear → surprise 15 / 7 / 16; joy → surprise 6 / 8 / 9</td><td>Words such as "overwhelmed", "shocked", "strange" fit both; surprise has the largest weight (×4.71)</td><td>BERT predicts surprise too often (precision 0.75, recall 0.99): check its examples</td></tr>
-                            <tr><td>sadness ↔ anger</td><td>Negative emotions confused with each other</td><td>sadness → anger 16 / 8 / 2; anger → sadness 10 / 10 / 16</td><td>Texts that express both hurt and annoyance</td><td>Group the examples by the emotion words they contain</td></tr>
-                            <tr><td>sadness → fear</td><td>Sad texts predicted as fear; barely changed by the transformers</td><td>16 / 15 / 8 of 550 sadness texts</td><td>Words like "anxious", "worried" sit between the two classes</td><td>Check whether the labels of these texts are consistent</td></tr>
-                            <tr><td>Negation</td><td>Negated texts labelled by the emotion word ("i do not feel reassured" → joy)</td><td>Two examples seen in the EDA; to be counted</td><td>Labels follow keywords, not meaning</td><td>Count negated texts and the error rate on them</td></tr>
+                            <tr><td class="model-col">joy → love</td><td class="score-col">42</td><td class="score-col">58</td><td class="score-col">20</td><td class="score-col">6.04</td></tr>
+                            <tr><td class="model-col">anger → sadness</td><td class="score-col">12</td><td class="score-col">8</td><td class="score-col">17</td><td class="score-col">4.36</td></tr>
+                            <tr><td class="model-col">anger → fear</td><td class="score-col">12</td><td class="score-col">7</td><td class="score-col">7</td><td class="score-col">4.36</td></tr>
+                            <tr><td class="model-col">fear → surprise</td><td class="score-col">11</td><td class="score-col">19</td><td class="score-col">26</td><td class="score-col">4.91</td></tr>
+                            <tr><td class="model-col">sadness → anger</td><td class="score-col">11</td><td class="score-col">23</td><td class="score-col">5</td><td class="score-col">1.89</td></tr>
+                            <tr><td class="model-col">surprise → fear</td><td class="score-col">10</td><td class="score-col">2</td><td class="score-col">0</td><td class="score-col"><strong>15.15</strong></td></tr>
+                            <tr><td class="model-col">joy → surprise</td><td class="score-col">7</td><td class="score-col">11</td><td class="score-col">7</td><td class="score-col">1.01</td></tr>
+                            <tr><td class="model-col">love → joy</td><td class="score-col">6</td><td class="score-col">8</td><td class="score-col">28</td><td class="score-col">3.77</td></tr>
+                            <tr><td class="model-col">sadness → fear</td><td class="score-col">6</td><td class="score-col">8</td><td class="score-col">2</td><td class="score-col">1.03</td></tr>
+                            <tr><td class="model-col">fear → sadness</td><td class="score-col">6</td><td class="score-col">8</td><td class="score-col">5</td><td class="score-col">2.68</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
             <p style="margin-top: 0.6rem;">
-                DistilBERT removes most of the baseline's scattered errors (sadness texts predicted wrong: 68 → 24) but not
-                joy → love or sadness → fear. BERT moves errors rather than removing them: it cuts joy → love from 33 to 13 but
-                adds love → joy and over-predicts surprise, ending with almost the same number of correct texts (1,877 vs 1,868).
+                The errors are concentrated: the three largest pairs hold 66 of 146 errors (45.2%), and every pair links two
+                close emotions; none links opposites such as joy and anger. By count joy → love is the largest error, but
+                relative to class size surprise → fear is the worst (15% of all surprise texts), which explains the low
+                surprise F1. The direction shows each model's bias: DistilBERT pushes joy towards love (42 vs 6 the other
+                way), BERT pushes love towards joy (28 vs 20) and over-predicts surprise (fear → surprise 26, never surprise →
+                fear; surprise precision 0.65, recall 0.94).
+            </p>
+
+            <div class="compare-table-card" style="margin-top: 0.75rem;">
+                <div class="title">2. Error groups: errors per model (share of its errors), one DistilBERT error, cause and fix</div>
+                <div class="table-scroll">
+                    <table class="info-table">
+                        <thead><tr><th>Group</th><th>DistilBERT</th><th>Baseline</th><th>BERT</th><th>Example (true → DistilBERT, confidence)</th><th>Hypothesised cause</th><th>Possible improvement</th></tr></thead>
+                        <tbody>
+                            <tr><td>G1 joy ↔ love</td><td>48 (32.9%)</td><td>66 (30.1%)</td><td>48 (33.3%)</td><td>"i chant the invocation and feel his force supporting me as i teach" (joy → love, 0.63)</td><td>Love texts often describe a happy feeling about someone, so the classes share words; class weights (love ×2.07, joy ×0.50) push unclear texts to love</td><td>More love examples; per-class decision thresholds tuned on validation</td></tr>
+                            <tr><td>G2 sadness / anger / fear</td><td>51 (34.9%)</td><td>61 (27.9%)</td><td>45 (31.2%)</td><td>"when i learnt that my best friend had failed the exams" (anger → sadness, 0.88)</td><td>One negative word (hurt, upset, stressed) fits several negative emotions; a text can hold more than one</td><td>Multi-label annotation; use more context than the single emotion word</td></tr>
+                            <tr><td>G3 fear ↔ surprise</td><td>21 (14.4%)</td><td>21 (9.6%)</td><td>26 (18.1%)</td><td>"i started to feel so overwhelmed" (fear → surprise, 0.70)</td><td>Surprise is the smallest class (564 train texts) and shares words such as "overwhelmed", "shocked" with fear</td><td>More surprise data or augmentation; a surprise threshold tuned on validation</td></tr>
+                            <tr><td>Other pairs</td><td>26 (17.8%)</td><td>71 (32.4%)</td><td>25 (17.4%)</td><td>–</td><td>Scattered, mostly keyword-driven errors of the baseline</td><td>–</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p style="margin-top: 0.6rem;">
+                The transformers remove most of the baseline's scattered errors ("other" 71 → 26) but not the three
+                structural groups. G1 has the same size for both transformers, only in opposite directions, which suggests
+                that the joy/love boundary is unclear in the labels themselves rather than a weakness of one model.
+            </p>
+
+            <h3 style="margin-top: 1rem; font-size: 1.02rem;">3. Examples and label noise</h3>
+            <div class="compare-table-card" style="margin-top: 0.6rem;">
+                <div class="title">Test texts with the predictions of the three main models (✓ = correct)</div>
+                <div class="table-scroll">
+                    <table class="info-table">
+                        <thead><tr><th>Case</th><th>Text</th><th>True</th><th>DistilBERT</th><th>Baseline</th><th>BERT</th></tr></thead>
+                        <tbody>
+                            <tr><td>Difficult, right</td><td>i was feeling pretty anxious all day but my first day at work was a very good day and that helped a lot</td><td>fear</td><td>✓ (1.00)</td><td>joy</td><td>✓</td></tr>
+                            <tr><td>Difficult, right</td><td>i do feel welcomed but it s a little weird</td><td>joy</td><td>✓ (1.00)</td><td>surprise</td><td>✓</td></tr>
+                            <tr><td>Difficult, right</td><td>i just feel extremely comfortable with the group of people that i dont even need to hide myself</td><td>joy</td><td>✓ (1.00)</td><td>anger</td><td>✓</td></tr>
+                            <tr><td>All wrong (G5)</td><td>i feel accepted and loved by a community of derby girls that i helped to create</td><td>joy</td><td>love (0.90)</td><td>love</td><td>love</td></tr>
+                            <tr><td>Disputed label</td><td>i feel like i am in paradise kissing those sweet lips make me feel like i dive into a magical world of love</td><td>joy (love in train)</td><td>love</td><td>love</td><td>joy ✓</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p style="margin-top: 0.6rem;">
+                <strong>Possible label noise.</strong> On 50 test texts all three models give the same wrong label (34.2% of
+                DistilBERT's errors): three different models agreeing against the gold label points to a doubtful label or a
+                truly ambiguous text. The 14 test texts whose copy in train or validation had another label support this:
+                DistilBERT gets 5 right, and on all 9 others it predicts exactly the label of the removed copy.
+                The difficult-but-right examples show where context helps; the "difficult" cases were found by filtering the
+                test predictions for texts with "but" or a negation that DistilBERT gets right and the baseline does not.
             </p>
         </section>
 
@@ -1777,18 +1955,22 @@
                 <span class="idx">09</span>
                 <h2>Limitations and conclusion</h2>
             </div>
-            <p><strong>Limitations.</strong> <em>Data:</em> labels are machine-generated; 51 of 52 repeated-text groups had
-            conflicting labels, and 14 test rows keep their disputed released labels; texts have no apostrophes ("I'll" appears
-            as <em>ill</em>); there are no author IDs, so near-duplicates by the same writer cannot be detected.
-            <em>Method:</em> one recipe for both transformers, not tuned; three epochs only, and the best epoch was the last
-            one in five of six runs. <em>Experiments:</em> results so far are on validation only, with three seeds per
-            transformer and one run for the baseline; timings are single measurements and the baseline ran on CPU while the
-            transformers ran on GPU.</p>
-            <p><strong>Conclusion (preliminary).</strong> A fine-tuned transformer clearly beats a strong lexical baseline
-            (Macro-F1 0.9155 vs 0.8489 on validation), with the largest gains on the smallest classes, at a much higher
-            compute cost. A larger encoder (BERT) does not improve on DistilBERT here, so DistilBERT is the better trade-off.
-            Next: the frozen-encoder experiment, one final test evaluation of the selected models, error analysis with
-            examples, and a cost table with repeated timing.</p>
+            <p><strong>Limitations.</strong> <em>Data:</em> one English dataset of short informal texts with machine-generated
+            labels; 51 of 52 repeated-text groups had conflicting labels and 14 test texts keep disputed labels; texts have no
+            apostrophes ("I'll" appears as <em>ill</em>); near-duplicates and author overlap could not be checked; surprise has
+            only 66 test texts. <em>Method:</em> no hyperparameter search for any model; the frozen-encoder result holds for one
+            recipe; single-label output although some texts express several emotions. <em>Experiments:</em> three seeds per
+            transformer and one run per baseline setting; timings come from a shared Colab machine (one CPU thread, one T4) and
+            GPU memory was not measured.</p>
+            <p><strong>Conclusion.</strong> <em>Does fine-tuning a pretrained transformer beat a TF-IDF baseline on six-class
+            emotion classification, and at what cost?</em> Yes: DistilBERT full fine-tune reaches test Macro-F1 0.8902
+            (accuracy 0.9270) against 0.8548 for the best baseline, better on every class and most on texts that need context,
+            at about 45× the CPU latency. BERT gives no measurable gain for twice the cost, and freezing the encoder does not
+            work under the same recipe. Two cheap choices, class weights and stopword removal with a negation keep-list, lift
+            the baseline from 0.7289 to 0.8548. The remaining errors lie between close emotions and partly reflect doubtful labels.</p>
+            <p><strong>Future work.</strong> Per-class thresholds tuned on validation for love and surprise; re-checking the
+            conflicting and all-models-wrong labels, or multi-label targets; a tuned learning rate and more epochs for the frozen
+            head; a smaller or quantised DistilBERT for CPU use.</p>
         </section>
 
         <!-- ═══════════════ 10 RESOURCES ═══════════════ -->
@@ -1799,16 +1981,115 @@
             </div>
             <div class="link-grid">
                 <a class="link-card" href="https://github.com/volethanhtrieu/DL_Assignment-02" target="_blank" rel="noopener"><span>Source code<small>GitHub repository</small></span><span>↗</span></a>
-                <a class="link-card" href="https://colab.research.google.com/drive/1_lOO_rj4URPZd1rPW23bUQWONaKKatt6?usp=sharing" target="_blank" rel="noopener"><span>Notebook<small>Open in Colab</small></span><span>↗</span></a>
-                <a class="link-card" href="#TODO" target="_blank" rel="noopener"><span>Checkpoints<small>Google Drive / HF Hub, or reproduction steps</small></span><span>↗</span></a>
-                <a class="link-card" href="#TODO" target="_blank" rel="noopener"><span>Report (PDF)<small>GroupGoat_A2_Report.pdf</small></span><span>↗</span></a>
-                <a class="link-card" href="#TODO"><span>Slides<small>Coming at M3 – 11/11</small></span><span>↗</span></a>
+                <a class="link-card" href="https://colab.research.google.com/drive/1F15lvbEVO81kwdqBB7uy2gbuvXwpHDBy?usp=sharing" target="_blank" rel="noopener"><span>Notebook<small>Open in Colab</small></span><span>↗</span></a>
+                <a class="link-card" href="#checkpoints"><span>Checkpoints<small>Drive folder, how to load, how to rebuild</small></span><span>↓</span></a>
+                <a class="link-card" href="https://github.com/volethanhtrieu/DL_Assignment-02/blob/main/report/Goat_A2_Report.pdf" target="_blank" rel="noopener"><span>Report (PDF)<small>Goat_A2_Report.pdf</small></span><span>↗</span></a>
+                <a class="link-card" href="https://github.com/volethanhtrieu/DL_Assignment-02/blob/main/slides/Goat_A2_Slides.pdf" target="_blank" rel="noopener"><span>Slides (PDF)<small>Goat_A2_Slides.pdf</small></span><span>↗</span></a>
+                <a class="link-card" href="https://www.youtube.com/watch?v=ok-hF_vicjc" target="_blank" rel="noopener"><span>Presentation video<small>YouTube, 14:48</small></span><span>↗</span></a>
                 <a class="link-card" href="https://github.com/volethanhtrieu/DL_Assignment-02/blob/main/docs/M1_Dataset_Proposal_01.md" target="_blank" rel="noopener"><span>M1 Dataset Proposal<small>Approval status: Approved</small></span><span>→</span></a>
             </div>
-            <p style="margin-top: 0.75rem;">Presentation video: final milestone.</p>
-            <!-- Final milestone: uncomment and replace VIDEO_ID. Title format: CO3133-Semester-261 – Group [ID] – Assignment 2
-            <iframe class="video-frame" src="https://www.youtube.com/embed/VIDEO_ID" title="Assignment 2 presentation video" loading="lazy" allowfullscreen></iframe>
-            -->
+
+            <h3 id="checkpoints" style="margin-top: 1.2rem; font-size: 1.02rem;">Checkpoints and how to reproduce them</h3>
+            <p>Every run keeps the epoch with the best validation Macro-F1 and saves it to Google Drive. The whole Drive folder
+            <code>DL</code> used by the notebook is shared (view only, no sign-in needed): all 12 checkpoints, the exported
+            results and a zip with the selected model (<code>distil_full_min</code>, DistilBERT full fine-tune, seed 42) and
+            the selected baseline (<code>tfidf_lr_aggr_cw</code>).</p>
+            <div class="link-grid">
+                <a class="link-card" href="https://drive.google.com/drive/folders/1WttjY7wrF5sedQDN2Oqnfmd_Hs6dLFk4?usp=drive_link" target="_blank" rel="noopener"><span>Google Drive folder DL<small>All 12 checkpoints + results, view only</small></span><span>↗</span></a>
+                <a class="link-card" href="https://huggingface.co/TrieuVo/goat-a2-emotion" target="_blank" rel="noopener"><span>Hugging Face model repo<small>Selected model + baseline, load with <code>from_pretrained</code></small></span><span>↗</span></a>
+            </div>
+            <p style="margin-top: 0.75rem;"><strong>What is in the folder</strong> (paths set in the notebook config cell)</p>
+            <div class="code-box"><pre><code>DL/
+└── A2/
+    ├── checkpoints/
+    │   ├── distil_full_min/            ← selected model (Hugging Face folder)
+    │   ├── distil_full_min_s43/   distil_full_min_s44/
+    │   ├── bert_full_min/   bert_full_min_s43/   bert_full_min_s44/
+    │   ├── distil_freeze_min/   distil_freeze_min_s43/   distil_freeze_min_s44/
+    │   ├── tfidf_lr_aggr_cw.joblib     ← selected baseline
+    │   └── tfidf_lr_min_cw.joblib   tfidf_lr_min_nocw.joblib
+    ├── results/                        ← same files as results/ in the repository
+    ├── results_export.zip
+    └── checkpoints_final.zip           ← distil_full_min/ + tfidf_lr_aggr_cw.joblib (257.3 MB)</code></pre></div>
+            <p style="margin-top: 0.75rem;"><strong>How to get a checkpoint</strong></p>
+            <ol>
+                <li>Open the folder link above and go to <code>A2 → checkpoints</code>.</li>
+                <li>Selected model and baseline only: download <code>A2/checkpoints_final.zip</code> (one file) and unzip it.</li>
+                <li>Any other run: right-click its folder (for example <code>bert_full_min</code>) → <code>Download</code>. Drive
+                zips the folder; unzip it and load it with the code below.</li>
+                <li>To evaluate in the notebook without retraining: upload the run folders to your own Drive as
+                <code>MyDrive/DL/A2/checkpoints/</code> and keep <code>LOAD_CKPT = True</code>. Copy them rather than adding a
+                shortcut: the shared folder is read-only and the notebook writes its results next to the checkpoints.</li>
+            </ol>
+            <div class="compare-table-card" style="margin-top: 0.9rem;">
+                <div class="title">Saved checkpoints (best epoch by validation Macro-F1)</div>
+                <div class="table-scroll">
+                    <table class="ranking-table" aria-label="Saved checkpoints">
+                        <thead>
+                            <tr><th class="model-col">run</th><th class="model-col">model, setup</th><th class="score-col">seed</th><th class="score-col">best epoch</th><th class="score-col">size (MB)</th><th class="score-col">train time (s)</th><th class="score-col">val Macro-F1</th><th class="model-col">in Drive folder</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="model-col"><strong>distil_full_min</strong></td><td class="model-col">DistilBERT, full fine-tune</td><td class="score-col">42</td><td class="score-col">3</td><td class="score-col">256.12</td><td class="score-col">289.02</td><td class="score-col">0.9148</td><td class="model-col"><strong>yes, also in the zip (selected model)</strong></td></tr>
+                            <tr><td class="model-col">distil_full_min_s43</td><td class="model-col">DistilBERT, full fine-tune</td><td class="score-col">43</td><td class="score-col">3</td><td class="score-col">256.12</td><td class="score-col">271.18</td><td class="score-col">0.9178</td><td class="model-col">yes</td></tr>
+                            <tr><td class="model-col">distil_full_min_s44</td><td class="model-col">DistilBERT, full fine-tune</td><td class="score-col">44</td><td class="score-col">3</td><td class="score-col">256.12</td><td class="score-col">270.48</td><td class="score-col">0.9140</td><td class="model-col">yes</td></tr>
+                            <tr><td class="model-col">bert_full_min</td><td class="model-col">BERT, full fine-tune</td><td class="score-col">42</td><td class="score-col">2</td><td class="score-col">418.36</td><td class="score-col">524.75</td><td class="score-col">0.9200</td><td class="model-col">yes</td></tr>
+                            <tr><td class="model-col">bert_full_min_s43</td><td class="model-col">BERT, full fine-tune</td><td class="score-col">43</td><td class="score-col">3</td><td class="score-col">418.36</td><td class="score-col">524.10</td><td class="score-col">0.9145</td><td class="model-col">yes</td></tr>
+                            <tr><td class="model-col">bert_full_min_s44</td><td class="model-col">BERT, full fine-tune</td><td class="score-col">44</td><td class="score-col">3</td><td class="score-col">418.36</td><td class="score-col">525.10</td><td class="score-col">0.9145</td><td class="model-col">yes</td></tr>
+                            <tr><td class="model-col">distil_freeze_min</td><td class="model-col">DistilBERT, frozen encoder</td><td class="score-col">42</td><td class="score-col">3</td><td class="score-col">256.12</td><td class="score-col">81.66</td><td class="score-col">0.4186</td><td class="model-col">yes</td></tr>
+                            <tr><td class="model-col">distil_freeze_min_s43</td><td class="model-col">DistilBERT, frozen encoder</td><td class="score-col">43</td><td class="score-col">2</td><td class="score-col">256.12</td><td class="score-col">81.60</td><td class="score-col">0.4132</td><td class="model-col">yes</td></tr>
+                            <tr><td class="model-col">distil_freeze_min_s44</td><td class="model-col">DistilBERT, frozen encoder</td><td class="score-col">44</td><td class="score-col">3</td><td class="score-col">256.12</td><td class="score-col">81.00</td><td class="score-col">0.4253</td><td class="model-col">yes</td></tr>
+                            <tr><td class="model-col"><strong>tfidf_lr_aggr_cw</strong></td><td class="model-col">TF-IDF + LR, stopwords removed, class weights</td><td class="score-col">–</td><td class="score-col">–</td><td class="score-col">1.17</td><td class="score-col">5.33</td><td class="score-col">0.8758</td><td class="model-col"><strong>yes, also in the zip (selected baseline)</strong></td></tr>
+                            <tr><td class="model-col">tfidf_lr_min_cw</td><td class="model-col">TF-IDF + LR, class weights</td><td class="score-col">–</td><td class="score-col">–</td><td class="score-col">2.23</td><td class="score-col">13.94</td><td class="score-col">0.8489</td><td class="model-col">yes</td></tr>
+                            <tr><td class="model-col">tfidf_lr_min_nocw</td><td class="model-col">TF-IDF + LR, no class weights</td><td class="score-col">–</td><td class="score-col">–</td><td class="score-col">2.23</td><td class="score-col">20.72</td><td class="score-col">0.7527</td><td class="model-col">yes</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <p style="margin-top: 0.6rem;">Transformers were trained on a Tesla T4 and the baselines on the Colab CPU (Intel Xeon @ 2.00GHz).
+            The train time counts training steps only. Each transformer checkpoint is a Hugging Face folder (weights, config with the
+            label names, tokenizer, <code>train_info.json</code> with the best epoch and train time). Each baseline is a
+            <code>joblib</code> file holding the fitted TF-IDF vectorizer and the logistic regression.</p>
+
+            <div class="code-box"><pre><code class="language-python">import unicodedata
+import joblib
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+# Selected model: the folder distil_full_min/ (from checkpoints_final.zip or A2/checkpoints/)
+tokenizer = AutoTokenizer.from_pretrained("distil_full_min")
+model = AutoModelForSequenceClassification.from_pretrained("distil_full_min").eval()
+
+def text_min(text):
+    # Same preprocessing as in training: NFC, lowercase, single spaces
+    return " ".join(unicodedata.normalize("NFC", text).lower().split())
+
+enc = tokenizer(text_min("i feel so lucky today"), truncation=True, max_length=128, return_tensors="pt")
+pred = model(**enc).logits.argmax(dim=1).item()
+print(model.config.id2label[pred])
+
+# Selected baseline: {"vectorizer", "model", "train_time_s"}; it expects text_aggr (notebook cell 9)
+baseline = joblib.load("tfidf_lr_aggr_cw.joblib")</code></pre></div>
+
+            <p style="margin-top: 0.75rem;"><strong>Rebuild every checkpoint</strong></p>
+            <ol>
+                <li>Open the notebook in Colab (link above) and choose <code>Runtime → Change runtime type → T4 GPU</code>.</li>
+                <li>Optional: add <code>WANDB_API_KEY</code> to Colab Secrets. Without it the notebook continues with <code>USE_WANDB = False</code>.</li>
+                <li>In the config cell set <code>LOAD_CKPT = False</code> to retrain everything. With <code>LOAD_CKPT = True</code>, any run that already has a checkpoint in <code>MyDrive/DL/A2/checkpoints/</code> is loaded and the others are trained.</li>
+                <li><code>Runtime → Run all</code>. Training takes about 45 minutes in total (sum of the train times above). A run counts as finished only when its <code>train_info.json</code> exists, so a run cut off by a disconnect is trained again.</li>
+                <li>The last cell writes <code>results/checkpoints.csv</code> (run, Drive path, size, best epoch, wandb run id) and zips the results.</li>
+            </ol>
+            <div class="callout">
+                <strong>Pinned for reproducibility:</strong> dataset revision <code>cab853a1dbdf4c42c2b3ef2173804746df8825fe</code>,
+                seeds 42 / 43 / 44, and the library versions in <code>results/hardware.json</code> (torch 2.14.1+cu130,
+                transformers 5.22.1, scikit-learn 1.6.1, datasets 4.8.5).
+                <strong>Checked:</strong> on 8 Nov 2026 the notebook was run again from scratch with the old checkpoints deleted.
+                Every validation metric, training history and per-class result came out identical to the earlier runs. Only
+                the timings changed.
+            </div>
+
+            <h3 id="video" style="margin-top: 1.2rem; font-size: 1.02rem;">Presentation video</h3>
+            <p>Presentation of Assignment 02 on YouTube (14:48): problem and data, models, results, controlled experiments, compute cost, error analysis and a live demo.</p>
+            <iframe class="video-frame" src="https://www.youtube.com/embed/ok-hF_vicjc" title="CO3133-Semester-261 – Group Goat – Assignment 2" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            <p style="margin-top: 0.5rem;">If the player does not load, <a href="https://www.youtube.com/watch?v=ok-hF_vicjc" target="_blank" rel="noopener">watch the video on YouTube ↗</a>.</p>
         </section>
 
         <!-- ═══════════════ 11 AI USAGE ═══════════════ -->
@@ -1835,14 +2116,33 @@
             </div>
         </section>
 
-        <!-- Optional: live demo (Gradio / HF Space). Uncomment if the group deploys one.
+        <!-- ═══════════════ 12 LIVE DEMO ═══════════════ -->
         <section class="section-card reveal" id="live-demo">
-            <div class="section-head"><span class="idx">12</span><h2>Live demo</h2></div>
+            <div class="section-head">
+                <span class="idx">12</span>
+                <h2>Live demo on a Hugging Face Space</h2>
+            </div>
+            <p>Type your own sentence and compare the selected DistilBERT model with the selected baseline. Both run in
+            your browser: DistilBERT is the saved checkpoint converted to ONNX (transformers.js), the baseline is computed
+            from the saved TF-IDF and Logistic Regression weights. On the 2,000 test texts both give the same class as the
+            original checkpoints on all of them. A typed sentence is
+            new data, so the demo shows behaviour, not a score.</p>
             <div class="demo-hf-wrap">
-                <iframe class="demo-hf-iframe" src="https://SPACE.hf.space" title="Demo" loading="lazy" allowfullscreen></iframe>
+                <p class="demo-box-label" style="margin-bottom:0.5rem;">Static Hugging Face Space · DistilBERT vs TF-IDF + Logistic Regression</p>
+                <iframe
+                    class="demo-hf-iframe"
+                    src="https://trieuvo-goat-a2-emotion-demo.static.hf.space"
+                    title="Goat A2 emotion demo"
+                    loading="lazy"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allowfullscreen>
+                </iframe>
+                <div class="demo-hf-cta">
+                    <p>If the frame does not load, open the Space in a new tab. DistilBERT is downloaded once, on the first prediction (255 MB).</p>
+                    <a href="https://huggingface.co/spaces/TrieuVo/goat-a2-emotion-demo" target="_blank" rel="noopener" class="demo-hf-btn">Open the Hugging Face Space</a>
+                </div>
             </div>
         </section>
-        -->
 
         <footer class="site-footer">Group Goat · Assignment 02 · CO3133</footer>
     </div>
@@ -1893,12 +2193,12 @@ train joy / train love       i am not amazing or great at photography but i feel
 
         // ---------- Highlight the current section in the TOC ----------
         const tocLinks = document.querySelectorAll("#toc a");
-        const sections = Array.from(document.querySelectorAll("section[id]"));
+        const sections = Array.from(document.querySelectorAll("section[id], #video"));   // #video = sub-part of section 10, own menu item
         window.addEventListener("scroll", () => {
             const y = window.scrollY + 180;
             let current = sections[0]?.id || "";
             sections.forEach((sec) => {
-                if (y >= sec.offsetTop) current = sec.id;
+                if (y >= sec.getBoundingClientRect().top + window.scrollY) current = sec.id;
             });
             tocLinks.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + current));
         });
@@ -1919,15 +2219,31 @@ train joy / train love       i am not amazing or great at photography but i feel
         // One object per run and split. Generate with: python scripts/results_to_js.py results/results.csv
         // Only real numbers from results/results.csv go here.
         const comparisonRows = [
-            // From results/results.csv (exported by the notebook, 2026-10-27); seed added from the same file
-            {"order": 0, "run": "tfidf_lr_min_nocw", "model": "TF-IDF + LR", "text": "Minimal", "setup": "class weights off", "seed": null, "split": "val", "acc": 0.828901154039137, "macroF1": 0.7527342595554116, "weightedF1": 0.8187253644238661, "trainTime": 7.17, "inferMs": 0.0276, "totalParams": 196662, "sizeMb": 2.23, "hardware": "CPU: Intel(R) Xeon(R) CPU @ 2.00GHz"},
-            {"order": 1, "run": "tfidf_lr_min_cw", "model": "TF-IDF + LR", "text": "Minimal", "setup": "class weights on", "seed": null, "split": "val", "acc": 0.875062719518314, "macroF1": 0.8488832946968711, "weightedF1": 0.8760204787201603, "trainTime": 5.79, "inferMs": 0.0244, "totalParams": 196662, "sizeMb": 2.23, "hardware": "CPU: Intel(R) Xeon(R) CPU @ 2.00GHz"},
-            {"order": 2, "run": "distil_full_min", "model": "DistilBERT", "text": "Minimal", "setup": "full fine-tune", "seed": 42, "split": "val", "acc": 0.9372804816859006, "macroF1": 0.9148237737796282, "weightedF1": 0.938099737594917, "trainTime": 252.65, "inferMs": 1.3905, "totalParams": 66958086, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
-            {"order": 3, "run": "distil_full_min_s43", "model": "DistilBERT", "text": "Minimal", "setup": "full fine-tune", "seed": 43, "split": "val", "acc": 0.9377822378324134, "macroF1": 0.917797585596631, "weightedF1": 0.9385037030660821, "trainTime": 245.92, "inferMs": 1.4063, "totalParams": 66958086, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
-            {"order": 4, "run": "distil_full_min_s44", "model": "DistilBERT", "text": "Minimal", "setup": "full fine-tune", "seed": 44, "split": "val", "acc": 0.9367787255393879, "macroF1": 0.9140146962802804, "weightedF1": 0.9374874026028405, "trainTime": 251.24, "inferMs": 1.4153, "totalParams": 66958086, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
-            {"order": 5, "run": "bert_full_min", "model": "BERT", "text": "Minimal", "setup": "full fine-tune", "seed": 42, "split": "val", "acc": 0.9417962870045158, "macroF1": 0.9199650870210424, "weightedF1": 0.9420399438717937, "trainTime": 502.63, "inferMs": 3.0624, "totalParams": 109486854, "sizeMb": 418.36, "hardware": "GPU: Tesla T4"},
-            {"order": 6, "run": "bert_full_min_s43", "model": "BERT", "text": "Minimal", "setup": "full fine-tune", "seed": 43, "split": "val", "acc": 0.9362769693928751, "macroF1": 0.9144762572869305, "weightedF1": 0.9370085717273564, "trainTime": 499.42, "inferMs": 3.0454, "totalParams": 109486854, "sizeMb": 418.36, "hardware": "GPU: Tesla T4"},
-            {"order": 7, "run": "bert_full_min_s44", "model": "BERT", "text": "Minimal", "setup": "full fine-tune", "seed": 44, "split": "val", "acc": 0.9367787255393879, "macroF1": 0.9144899650067341, "weightedF1": 0.9376362937184797, "trainTime": 499.67, "inferMs": 3.05, "totalParams": 109486854, "sizeMb": 418.36, "hardware": "GPU: Tesla T4"},
+            // From results/results.csv (final run 2026-11-08, test added 2026-11-08, timing re-measured 2026-11-09)
+            {"order": 0, "run": "tfidf_lr_min_nocw", "model": "TF-IDF + LR", "text": "Minimal", "setup": "class weights off", "seed": null, "split": "test", "acc": 0.8325, "macroF1": 0.728873363719647, "weightedF1": 0.8206099153183858, "trainTime": 20.72, "inferMs": 0.0247, "totalParams": 196662, "trainableParams": 196662, "sizeMb": 2.23, "hardware": "CPU: Intel(R) Xeon(R) CPU @ 2.00GHz"},
+            {"order": 1, "run": "tfidf_lr_min_cw", "model": "TF-IDF + LR", "text": "Minimal", "setup": "class weights on", "seed": null, "split": "test", "acc": 0.8695, "macroF1": 0.8364610138051892, "weightedF1": 0.8717729976591243, "trainTime": 13.94, "inferMs": 0.0238, "totalParams": 196662, "trainableParams": 196662, "sizeMb": 2.23, "hardware": "CPU: Intel(R) Xeon(R) CPU @ 2.00GHz"},
+            {"order": 2, "run": "tfidf_lr_aggr_cw", "model": "TF-IDF + LR", "text": "Aggressive", "setup": "class weights on", "seed": null, "split": "test", "acc": 0.8905, "macroF1": 0.8547544523081395, "weightedF1": 0.8933277234896413, "trainTime": 5.33, "inferMs": 0.0148, "totalParams": 102426, "trainableParams": 102426, "sizeMb": 1.17, "hardware": "CPU: Intel(R) Xeon(R) CPU @ 2.00GHz"},
+            {"order": 3, "run": "distil_full_min", "model": "DistilBERT", "text": "Minimal", "setup": "full fine-tune", "seed": 42, "split": "test", "acc": 0.927, "macroF1": 0.8902395797831463, "weightedF1": 0.9281131328421559, "trainTime": 289.02, "inferMs": 1.6288, "totalParams": 66958086, "trainableParams": 66958086, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 4, "run": "distil_full_min_s43", "model": "DistilBERT", "text": "Minimal", "setup": "full fine-tune", "seed": 43, "split": "test", "acc": 0.923, "macroF1": 0.8854208952967652, "weightedF1": 0.9246463655486425, "trainTime": 271.18, "inferMs": 1.6494, "totalParams": 66958086, "trainableParams": 66958086, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 5, "run": "distil_full_min_s44", "model": "DistilBERT", "text": "Minimal", "setup": "full fine-tune", "seed": 44, "split": "test", "acc": 0.9245, "macroF1": 0.8827575190522521, "weightedF1": 0.9255572688097733, "trainTime": 270.48, "inferMs": 1.5923, "totalParams": 66958086, "trainableParams": 66958086, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 6, "run": "bert_full_min", "model": "BERT", "text": "Minimal", "setup": "full fine-tune", "seed": 42, "split": "test", "acc": 0.928, "macroF1": 0.8881475234931736, "weightedF1": 0.9285175885245514, "trainTime": 524.75, "inferMs": 3.1584, "totalParams": 109486854, "trainableParams": 109486854, "sizeMb": 418.36, "hardware": "GPU: Tesla T4"},
+            {"order": 7, "run": "bert_full_min_s43", "model": "BERT", "text": "Minimal", "setup": "full fine-tune", "seed": 43, "split": "test", "acc": 0.9245, "macroF1": 0.8877031855285443, "weightedF1": 0.9260097391458788, "trainTime": 524.1, "inferMs": 3.1945, "totalParams": 109486854, "trainableParams": 109486854, "sizeMb": 418.36, "hardware": "GPU: Tesla T4"},
+            {"order": 8, "run": "bert_full_min_s44", "model": "BERT", "text": "Minimal", "setup": "full fine-tune", "seed": 44, "split": "test", "acc": 0.927, "macroF1": 0.887419753776375, "weightedF1": 0.9283557419695557, "trainTime": 525.1, "inferMs": 3.1453, "totalParams": 109486854, "trainableParams": 109486854, "sizeMb": 418.36, "hardware": "GPU: Tesla T4"},
+            {"order": 9, "run": "distil_freeze_min", "model": "DistilBERT", "text": "Minimal", "setup": "frozen backbone", "seed": 42, "split": "test", "acc": 0.501, "macroF1": 0.4199041794817257, "weightedF1": 0.5182896126654586, "trainTime": 81.66, "inferMs": 1.5933, "totalParams": 66958086, "trainableParams": 595206, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 10, "run": "distil_freeze_min_s43", "model": "DistilBERT", "text": "Minimal", "setup": "frozen backbone", "seed": 43, "split": "test", "acc": 0.494, "macroF1": 0.419852303980954, "weightedF1": 0.51151712033119, "trainTime": 81.6, "inferMs": 1.5931, "totalParams": 66958086, "trainableParams": 595206, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 11, "run": "distil_freeze_min_s44", "model": "DistilBERT", "text": "Minimal", "setup": "frozen backbone", "seed": 44, "split": "test", "acc": 0.497, "macroF1": 0.4233448767034181, "weightedF1": 0.5147341850327812, "trainTime": 81.0, "inferMs": 1.5866, "totalParams": 66958086, "trainableParams": 595206, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 12, "run": "tfidf_lr_min_nocw", "model": "TF-IDF + LR", "text": "Minimal", "setup": "class weights off", "seed": null, "split": "val", "acc": 0.828901154039137, "macroF1": 0.7527342595554116, "weightedF1": 0.8187253644238661, "trainTime": 20.72, "inferMs": 0.0247, "totalParams": 196662, "trainableParams": 196662, "sizeMb": 2.23, "hardware": "CPU: Intel(R) Xeon(R) CPU @ 2.00GHz"},
+            {"order": 13, "run": "tfidf_lr_min_cw", "model": "TF-IDF + LR", "text": "Minimal", "setup": "class weights on", "seed": null, "split": "val", "acc": 0.875062719518314, "macroF1": 0.8488832946968711, "weightedF1": 0.8760204787201603, "trainTime": 13.94, "inferMs": 0.0238, "totalParams": 196662, "trainableParams": 196662, "sizeMb": 2.23, "hardware": "CPU: Intel(R) Xeon(R) CPU @ 2.00GHz"},
+            {"order": 14, "run": "tfidf_lr_aggr_cw", "model": "TF-IDF + LR", "text": "Aggressive", "setup": "class weights on", "seed": null, "split": "val", "acc": 0.8991470145509283, "macroF1": 0.8757565359300771, "weightedF1": 0.9001956613864938, "trainTime": 5.33, "inferMs": 0.0148, "totalParams": 102426, "trainableParams": 102426, "sizeMb": 1.17, "hardware": "CPU: Intel(R) Xeon(R) CPU @ 2.00GHz"},
+            {"order": 15, "run": "distil_full_min", "model": "DistilBERT", "text": "Minimal", "setup": "full fine-tune", "seed": 42, "split": "val", "acc": 0.9372804816859006, "macroF1": 0.9148237737796282, "weightedF1": 0.938099737594917, "trainTime": 289.02, "inferMs": 1.6288, "totalParams": 66958086, "trainableParams": 66958086, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 16, "run": "distil_full_min_s43", "model": "DistilBERT", "text": "Minimal", "setup": "full fine-tune", "seed": 43, "split": "val", "acc": 0.9377822378324134, "macroF1": 0.917797585596631, "weightedF1": 0.9385037030660821, "trainTime": 271.18, "inferMs": 1.6494, "totalParams": 66958086, "trainableParams": 66958086, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 17, "run": "distil_full_min_s44", "model": "DistilBERT", "text": "Minimal", "setup": "full fine-tune", "seed": 44, "split": "val", "acc": 0.9367787255393879, "macroF1": 0.9140146962802804, "weightedF1": 0.9374874026028405, "trainTime": 270.48, "inferMs": 1.5923, "totalParams": 66958086, "trainableParams": 66958086, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 18, "run": "bert_full_min", "model": "BERT", "text": "Minimal", "setup": "full fine-tune", "seed": 42, "split": "val", "acc": 0.9417962870045158, "macroF1": 0.9199650870210424, "weightedF1": 0.9420399438717937, "trainTime": 524.75, "inferMs": 3.1584, "totalParams": 109486854, "trainableParams": 109486854, "sizeMb": 418.36, "hardware": "GPU: Tesla T4"},
+            {"order": 19, "run": "bert_full_min_s43", "model": "BERT", "text": "Minimal", "setup": "full fine-tune", "seed": 43, "split": "val", "acc": 0.9362769693928751, "macroF1": 0.9144762572869305, "weightedF1": 0.9370085717273564, "trainTime": 524.1, "inferMs": 3.1945, "totalParams": 109486854, "trainableParams": 109486854, "sizeMb": 418.36, "hardware": "GPU: Tesla T4"},
+            {"order": 20, "run": "bert_full_min_s44", "model": "BERT", "text": "Minimal", "setup": "full fine-tune", "seed": 44, "split": "val", "acc": 0.9367787255393879, "macroF1": 0.9144899650067341, "weightedF1": 0.9376362937184797, "trainTime": 525.1, "inferMs": 3.1453, "totalParams": 109486854, "trainableParams": 109486854, "sizeMb": 418.36, "hardware": "GPU: Tesla T4"},
+            {"order": 21, "run": "distil_freeze_min", "model": "DistilBERT", "text": "Minimal", "setup": "frozen backbone", "seed": 42, "split": "val", "acc": 0.4907175112895133, "macroF1": 0.41860086058280793, "weightedF1": 0.5094383313201685, "trainTime": 81.66, "inferMs": 1.5933, "totalParams": 66958086, "trainableParams": 595206, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 22, "run": "distil_freeze_min_s43", "model": "DistilBERT", "text": "Minimal", "setup": "frozen backbone", "seed": 43, "split": "val", "acc": 0.48419468138484695, "macroF1": 0.41324639730523344, "weightedF1": 0.5022982142186837, "trainTime": 81.6, "inferMs": 1.5931, "totalParams": 66958086, "trainableParams": 595206, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
+            {"order": 23, "run": "distil_freeze_min_s44", "model": "DistilBERT", "text": "Minimal", "setup": "frozen backbone", "seed": 44, "split": "val", "acc": 0.4872052182639237, "macroF1": 0.4253318124629852, "weightedF1": 0.5052129909503605, "trainTime": 81.0, "inferMs": 1.5866, "totalParams": 66958086, "trainableParams": 595206, "sizeMb": 256.12, "hardware": "GPU: Tesla T4"},
         ];
 
         // Columns that get best / second-best highlighting, and which direction is better
@@ -1937,6 +2253,7 @@ train joy / train love       i am not amazing or great at photography but i feel
             { key: "trainTime", direction: "asc" },
             { key: "inferMs", direction: "asc" },
             { key: "totalParams", direction: "asc" },
+            { key: "trainableParams", direction: "asc" },
             { key: "sizeMb", direction: "asc" }
         ];
 
@@ -2011,6 +2328,7 @@ train joy / train love       i am not amazing or great at photography but i feel
                     <td class="cost-col ${c.trainTime}">${row.trainTime.toFixed(1)}</td>
                     <td class="cost-col ${c.inferMs}">${row.inferMs.toFixed(3)}</td>
                     <td class="cost-col ${c.totalParams}">${(row.totalParams / 1e6).toFixed(2)}</td>
+                    <td class="cost-col ${c.trainableParams}">${(row.trainableParams / 1e6).toFixed(2)}</td>
                     <td class="cost-col ${c.sizeMb}">${row.sizeMb.toFixed(2)}</td>
                     <td>${row.hardware}</td>
                 `;
