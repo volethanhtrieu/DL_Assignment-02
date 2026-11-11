@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Goat Emotion Demo</title>
+    <style>
+        :root {
+            --navy: #0b2a4a;
+            --bg: #f7fbff;
+            --ink: #17324d;
+            --muted: #5b6b7f;
+            --panel: #ffffff;
+            --line: #d7e4f1;
+            --accent: #1769aa;
+            --bar: #c9daec;
+            --top: #1769aa;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --navy: #cfe3f7;
+                --bg: #0d1722;
+                --ink: #e3edf7;
+                --muted: #9db0c4;
+                --panel: #142233;
+                --line: #263a51;
+                --accent: #5aa7e8;
+                --bar: #2a405a;
+                --top: #5aa7e8;
+            }
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        main { max-width: 920px; margin: 0 auto; padding: 18px 16px 24px; }
+        h1 { font-size: 1.25rem; margin: 0 0 4px; color: var(--navy); }
+        .sub { margin: 0 0 14px; color: var(--muted); font-size: 0.9rem; }
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+        }
+        label.field { display: block; font-weight: 600; margin-bottom: 6px; }
+        textarea {
+            width: 100%;
+            min-height: 76px;
+            resize: vertical;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--bg);
+            color: var(--ink);
+            font: inherit;
+        }
+        textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+        .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+        button.primary {
+            background: var(--accent);
+            color: #fff;
+            border: 0;
+            border-radius: 10px;
+            padding: 9px 18px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+        button.primary:disabled { opacity: 0.6; cursor: progress; }
+        .mode { display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.86rem; color: var(--muted); }
+        .mode label { display: flex; gap: 5px; align-items: center; cursor: pointer; }
+        .examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .examples button {
+            border: 1px solid var(--line);
+            background: var(--bg);
+            color: var(--ink);
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .examples button:hover { border-color: var(--accent); }
+        #status { margin-top: 10px; font-size: 0.85rem; color: var(--muted); min-height: 1.3em; }
+        .results { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+        .results h2 { font-size: 0.98rem; margin: 0 0 2px; }
+        .results .meta { font-size: 0.78rem; color: var(--muted); margin: 0 0 10px; }
+        .pred { font-size: 1.15rem; font-weight: 800; color: var(--top); margin: 0 0 8px; min-height: 1.6em; }
+        .bar-row { display: grid; grid-template-columns: 70px 1fr 60px; gap: 8px; align-items: center; margin: 5px 0; font-size: 0.86rem; }
+        .bar { height: 10px; border-radius: 6px; background: var(--line); overflow: hidden; }
+        .bar span { display: block; height: 100%; width: 0; background: var(--bar); transition: width 0.25s; }
+        .bar-row.top .bar span { background: var(--top); }
+        .bar-row.top { font-weight: 700; }
+        .num { text-align: right; font-variant-numeric: tabular-nums; }
+        .seen { margin-top: 8px; font-size: 0.78rem; color: var(--muted); word-break: break-word; }
+        .seen code { font-size: 0.78rem; }
+        .note { margin-top: 12px; font-size: 0.8rem; color: var(--muted); }
+        .note a { color: var(--accent); }
+        @media (max-width: 640px) { .results { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Emotion classification · Group Goat (CO3133 Assignment 02)</h1>
+    <p class="sub">Type an English sentence. Both selected models predict one of six emotions: sadness, joy, love, anger, fear, surprise. Everything runs in your browser.</p>
+
+    <div class="card">
+        <label class="field" for="text">Your sentence</label>
+        <textarea id="text" placeholder="i feel ..."></textarea>
+        <div class="row">
+            <button class="primary" id="run">Predict</button>
+            <span class="mode">DistilBERT is downloaded once, on the first prediction (255 MB)</span>
+        </div>
+        <div class="examples" id="examples"></div>
+        <div id="status">Loading the baseline…</div>
+    </div>
+
+    <div class="results">
+        <div class="card" id="distilCard">
+            <h2>DistilBERT, full fine-tune</h2>
+            <p class="meta">Selected model · test Macro-F1 0.8902, accuracy 0.9270</p>
+            <p class="pred" data-pred></p>
+            <div data-bars></div>
+            <p class="seen" data-seen></p>
+        </div>
+        <div class="card" id="baseCard">
+            <h2>TF-IDF + Logistic Regression</h2>
+            <p class="meta">Selected baseline · test Macro-F1 0.8548, accuracy 0.8905</p>
+            <p class="pred" data-pred></p>
+            <div data-bars></div>
+            <p class="seen" data-seen></p>
+        </div>
+    </div>
+
+    <p class="note">
+        The training texts (<code>dair-ai/emotion</code>) are lowercase English without punctuation, most starting with
+        "i feel …", so sentences written that way are closest to what the models learned. A sentence typed here is new
+        data, not part of the test set: the demo shows behaviour, not a score. DistilBERT is the saved checkpoint converted
+        to ONNX with its float32 weights unchanged; the baseline is computed from the saved TF-IDF and Logistic Regression
+        weights. Both give the same class as the original models on all 2,000 test texts.
+        <a href="https://volethanhtrieu.github.io/DL_Assignment-02/" target="_blank" rel="noopener">Assignment page</a> ·
+        <a href="https://huggingface.co/TrieuVo/goat-a2-emotion" target="_blank" rel="noopener">Model checkpoints</a>
+    </p>
+</main>
+
+<script type="module">
+    import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
+    import { cleanMin, makeBaseline } from "./goat.js";
+
+    // Model files are served by this Space (folder model/), never fetched from elsewhere
+    env.allowRemoteModels = false;
+    env.allowLocalModels = true;
+    env.localModelPath = new URL("./", window.location.href).href;
+
+    const LABELS = ["sadness", "joy", "love", "anger", "fear", "surprise"];
+    const EXAMPLES = [
+        "i feel so lucky to have friends who care about me",
+        "i am not happy with how this project turned out",
+        "i was shocked when i saw how much the town had changed",
+        "i feel nervous about the exam tomorrow",
+        "i am so annoyed that he lied to me again",
+        "i miss my grandmother so much",
+        "i feel so loved when you hold my hand",
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const status = (msg) => { $("status").textContent = msg; };
+    let classifier = null;    // DistilBERT pipeline, loaded on the first prediction
+    let baseline = null;
+
+    function showResult(card, probs, seenText) {
+        const byLabel = Object.fromEntries(probs.map((p) => [p.label, p.score]));
+        const best = probs.reduce((a, b) => (b.score > a.score ? b : a)).label;
+        card.querySelector("[data-pred]").textContent = best;
+        const bars = card.querySelector("[data-bars]");
+        bars.replaceChildren(...LABELS.map((label) => {
+            const row = document.createElement("div");
+            row.className = "bar-row" + (label === best ? " top" : "");
+            const name = document.createElement("span");
+            name.textContent = label;
+            const bar = document.createElement("div");
+            bar.className = "bar";
+            const fill = document.createElement("span");
+            fill.style.width = (100 * byLabel[label]).toFixed(1) + "%";
+            bar.append(fill);
+            const num = document.createElement("span");
+            num.className = "num";
+            num.textContent = (100 * byLabel[label]).toFixed(1) + "%";
+            row.append(name, bar, num);
+            return row;
+        }));
+        const seen = card.querySelector("[data-seen]");
+        seen.textContent = "Model input: ";
+        const code = document.createElement("code");
+        code.textContent = seenText || "(empty)";
+        seen.append(code);
+    }
+
+    function getClassifier() {
+        if (!classifier) {
+            // dtype fp32 = model/onnx/model.onnx, the checkpoint weights unchanged
+            classifier = pipeline("text-classification", "model", {
+                dtype: "fp32",
+                progress_callback: (p) => {
+                    if (p.status === "progress" && p.file.endsWith(".onnx")) {
+                        status(`Downloading DistilBERT: ${p.progress.toFixed(0)}%`);
+                    }
+                },
+            }).then((clf) => {
+                clf.tokenizer.model_max_length = 128;   // same truncation as in training
+                return clf;
+            });
+        }
+        return classifier;
+    }
+
+    async function run() {
+        const text = $("text").value;
+        const textMin = cleanMin(text);
+        if (!textMin) { status("Type a sentence first."); return; }
+        $("run").disabled = true;
+        status("Loading DistilBERT…");
+        try {
+            const base = baseline.predict(text);
+            const note = base.known === 0 ? "  (no n-gram known to the baseline: it falls back to the class priors)" : "";
+            showResult($("baseCard"), base.probs, base.textAggr + note);
+
+            const clf = await getClassifier();
+            status("Running DistilBERT…");
+            const out = await clf(textMin, { top_k: null });
+            showResult($("distilCard"), out, textMin);
+            status("Done");
+        } catch (err) {
+            status("Error: " + err.message);
+        } finally {
+            $("run").disabled = false;
+        }
+    }
+
+    for (const example of EXAMPLES) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.textContent = example;
+        b.addEventListener("click", () => { $("text").value = example; run(); });
+        $("examples").append(b);
+    }
+    $("run").addEventListener("click", run);
+    $("text").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); run(); }
+    });
+
+    try {
+        baseline = makeBaseline(await (await fetch("baseline.json")).json());
+        status("Ready. DistilBERT is downloaded on the first prediction.");
+    } catch (err) {
+        status("Could not load the baseline: " + err.message);
+    }
+</script>
+</body>
+</html>
