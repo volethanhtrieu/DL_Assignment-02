@@ -1,0 +1,5 @@
+# Recorded presentation videos (uploaded to YouTube, too large for GitHub)
+*.mp4
+*.mkv
+*.mov
+*.webm
